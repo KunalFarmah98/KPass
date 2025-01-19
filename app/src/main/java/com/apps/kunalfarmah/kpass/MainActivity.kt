@@ -76,13 +76,17 @@ class MainActivity : AppCompatActivity() {
                     biometricResult?.let { result ->
                         when (result) {
                             is BiometricPromptManager.BiometricResult.AuthenticationError -> {
-                                result.error
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Authentication failed due to ${result.error}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
                                 Toast.makeText(
                                     applicationContext,
-                                    "Authentication failed",
+                                    "Authentication failed, please try again",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -100,6 +104,7 @@ class MainActivity : AppCompatActivity() {
                                     "Biometric Feature unavailable",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                finish()
                             }
 
                             BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
@@ -108,7 +113,7 @@ class MainActivity : AppCompatActivity() {
                                     "Biometric Hardware unavailable",
                                     Toast.LENGTH_SHORT
                                 ).show()
-
+                                finish()
                             }
 
                             else -> {}
