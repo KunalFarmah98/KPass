@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
+import com.apps.kunalfarmah.kpass.ui.components.MainScreen
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 
 
@@ -92,10 +93,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
-                                Greeting(
-                                    name = "Android",
-                                    modifier = Modifier.padding(innerPadding)
-                                )
+                                MainScreen(Modifier.padding(innerPadding))
                             }
 
                             BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
@@ -120,10 +118,6 @@ class MainActivity : AppCompatActivity() {
 
                         }
                     }
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
                 }
             }
         }
