@@ -1,5 +1,6 @@
 package com.apps.kunalfarmah.kpass.constant
+import com.apps.kunalfarmah.kpass.BuildConfig
 
 class Constants {
-    val BIOMETRIC_REQUEST_CODE = 1001
+    val masterPass = BuildConfig.masterPass
 }

@@ -1,9 +1,12 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
+val masterPass: String = gradleLocalProperties(rootDir, providers).getProperty("masterPass")
 android {
     namespace = "com.apps.kunalfarmah.kpass"
     compileSdk = 35
@@ -14,8 +17,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String","masterPass", masterPass)
     }
 
     buildTypes {
