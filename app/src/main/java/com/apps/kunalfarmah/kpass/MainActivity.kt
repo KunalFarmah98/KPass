@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
+import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.ui.components.MainScreen
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CryptoManager.context = this
         enableEdgeToEdge()
         setContent {
             KPassTheme {
