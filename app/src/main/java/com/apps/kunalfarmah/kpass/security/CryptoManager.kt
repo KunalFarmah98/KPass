@@ -37,23 +37,25 @@ object CryptoManager {
 
     init{
         keystore.load(null)
+//        keystore.deleteEntry(Constants.KEY_MASTER)
         // get secretKey from keystore
         secretKey = keystore.getKey(Constants.KEY_MASTER,null) as? SecretKey
         // if secret key exists, get private key from dataStore and decrypt it
         secretKey?.let {key ->
             CoroutineScope(Dispatchers.IO).launch {
                 context.dataStore.data.collect{
-                    privateKey = it[byteArrayPreferencesKey(Constants.KEY_PRIVATE)]
-                }
-                if(privateKey != null){
-                    Log.d("CryptoManager", "received privateKey: ${privateKey.toString()}")
-                    privateKey = decryptAES(privateKey!!.toString(), key).toByteArray()
+                    val encryptedPrivateKey = it[stringPreferencesKey(Constants.KEY_PRIVATE)]
+                    if(encryptedPrivateKey != null){
+                        Log.d("CryptoManager", "received privateKey: $encryptedPrivateKey")
+                        privateKey = decryptAES(encryptedPrivateKey, key).toByteArray()
+                    }
+                    Log.d("CryptoManager", "secretKey: $secretKey")
+                    Log.d("CryptoManager", "privateKey: ${privateKey.toString()}")
                 }
             }
         }
 
-        Log.d("CryptoManager", "secretKey: $secretKey")
-        Log.d("CryptoManager", "privateKey: ${privateKey.toString()}")
+
     }
 
 
@@ -133,11 +135,14 @@ object CryptoManager {
         // set privateKey
         privateKey = privKey.encoded
 
+        val encryptedPrivateKey = encryptAES(privateKey!!.toString(), secretKey!!)
+        Log.d("CryptoManager", "encrypted privateKey: $encryptedPrivateKey")
+
         // store encrypted privateKey in datastore
         CoroutineScope(Dispatchers.IO).launch {
             context.dataStore.updateData {
                 it.toMutablePreferences().apply {
-                    this[stringPreferencesKey(Constants.KEY_PRIVATE)] = encryptAES(privateKey!!.toString(), secretKey!!)
+                    this[stringPreferencesKey(Constants.KEY_PRIVATE)] = encryptedPrivateKey
                 }
             }
         }
