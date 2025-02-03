@@ -58,7 +58,7 @@ fun MainScreen(modifier: Modifier){
             Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
 
             Button(modifier = Modifier.padding(20.dp), onClick = {
-                decryptedText.value = CryptoManager.decryptData(encryptedText.value)
+                decryptedText.value = CryptoManager.decryptData(text.value)
             }) {
                 Text("decrypt")
             }
