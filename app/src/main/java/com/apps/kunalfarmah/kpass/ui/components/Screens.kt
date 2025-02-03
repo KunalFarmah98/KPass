@@ -30,49 +30,36 @@ fun MainScreen(modifier: Modifier){
     val text = remember { mutableStateOf("") }
     val encryptedText = remember { mutableStateOf("") }
     val decryptedText = remember { mutableStateOf("") }
-    var enterPassword by remember { mutableStateOf(false) }
-    LaunchedEffect(true) {
-        // if no private key is stored, prompt for password
-        context.dataStore.data.collect {
-            val encryptedPrivateKey = it[stringPreferencesKey(Constants.KEY_PRIVATE)]
-            if(encryptedPrivateKey.isNullOrEmpty()){
-                enterPassword = true
-            }
-        }
-    }
-    if(enterPassword){
-        PasswordDialog(modifier, onSuccess = {
-            enterPassword = false
-        })
-    }
-    else {
-        Column(
-            modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            TextField(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                value = text.value,
-                onValueChange = { text.value = it },
-                label = { Text("Password") })
-            Button(modifier = Modifier.padding(20.dp), onClick = {
-                encryptedText.value = CryptoManager.encryptData(text.value)
-            }) {
-                Text("encrypt")
-            }
-            SelectionContainer() {
-                Column {
-                    Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
-                }
-            }
 
-            Button(modifier = Modifier.padding(20.dp), onClick = {
-                decryptedText.value = CryptoManager.decryptData(text.value)
-            }) {
-                Text("decrypt")
-            }
-            Text(decryptedText.value)
+    Column(
+        modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            value = text.value,
+            onValueChange = { text.value = it },
+            label = { Text("Password") })
+        Button(modifier = Modifier.padding(20.dp), onClick = {
+            encryptedText.value = CryptoManager.encrypt(text.value)
+        }) {
+            Text("encrypt")
         }
+        SelectionContainer() {
+            Column {
+                Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
+            }
+        }
+
+        Button(modifier = Modifier.padding(20.dp), onClick = {
+            decryptedText.value = CryptoManager.decrypt(text.value)
+        }) {
+            Text("decrypt")
+        }
+        Text(decryptedText.value)
     }
+
 }

@@ -36,39 +36,13 @@ object CryptoManager {
     private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC
     private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
     private const val TRANSFORMATION = "$AES_ALGORITHM/$BLOCK_MODE/$PADDING"
-    private lateinit var privateKey: ByteArray
 
     private val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
         load(null) // With load function we initialize our keystore
-//        deleteEntry(Constants.KEY_MASTER)
-    }
-
-    init{
-        CoroutineScope(Dispatchers.IO).launch {
-            val secretKey = getOrCreateKey()
-            context.dataStore.data.collect{
-                val encryptedPrivateKey = it[stringPreferencesKey(Constants.KEY_PRIVATE)]
-                if(encryptedPrivateKey != null){
-                    Log.d("CryptoManager", "received privateKey: $encryptedPrivateKey")
-                    privateKey = decryptAES(encryptedPrivateKey).toByteArray()
-                    Log.d("CryptoManager", "secretKey: $secretKey")
-                    Log.d("CryptoManager", "privateKey: $privateKey")
-                }
-            }
-        }
     }
 
 
-    private fun encryptAES(plainText: String, key: ByteArray): String {
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val secretKey: SecretKey = SecretKeySpec(key, "AES")
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        val iv = cipher.iv
-        val encryptedBytes = cipher.doFinal(plainText.toByteArray())
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT) + ":" + Base64.encodeToString(iv, Base64.DEFAULT)
-    }
-
-    private fun encryptAES(plainText: String): String {
+    fun encrypt(plainText: String): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
 
@@ -81,20 +55,7 @@ object CryptoManager {
         return Base64.encodeToString(encryptedDataWithIV, Base64.DEFAULT)
     }
 
-    private fun decryptAES(encryptedText: String, key: ByteArray): String {
-        val parts = encryptedText.split(":")
-        val encryptedData = Base64.decode(parts[0], Base64.DEFAULT)
-        val iv = Base64.decode(parts[1], Base64.DEFAULT)
-
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val secretKey: SecretKey = SecretKeySpec(key, "AES")
-        val gcmParameterSpec = GCMParameterSpec(128, iv)
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec)
-        val decryptedBytes = cipher.doFinal(encryptedData)
-        return String(decryptedBytes)
-    }
-
-    private fun decryptAES(encryptedText: String): String {
+    fun decrypt(encryptedText: String): String {
         val encryptedDataWithIV = Base64.decode(encryptedText, Base64.DEFAULT)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val iv = encryptedDataWithIV.copyOfRange(0, cipher.blockSize)
@@ -128,41 +89,4 @@ object CryptoManager {
         return key
     }
 
-    fun encryptData(data: String): String{
-        return encryptAES(data)
-    }
-
-    fun decryptData(data: String): String{
-        return decryptAES(data)
-    }
-
-    fun generateSecretKeyFromPassword(password: String, iterations: Int = 65536, keyLength: Int = 256) {
-        // if key is already stored, get its value or create and store a new salt
-        val salt = ByteArray(32)
-        SecureRandom().nextBytes(salt)
-        val factory: SecretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-        val spec: KeySpec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength)
-        // generate the private key
-        val privKey = factory.generateSecret(spec)
-
-        // set privateKey
-        privateKey = privKey.encoded
-
-        Log.d("CryptoManager", "new privateKey: ${privateKey.toString()}")
-
-        val encryptedPrivateKey = encryptAES(privateKey.toString())
-        Log.d("CryptoManager", "encrypted privateKey: $encryptedPrivateKey")
-
-        // store encrypted privateKey in datastore
-        CoroutineScope(Dispatchers.IO).launch {
-            context.dataStore.updateData {
-                it.toMutablePreferences().apply {
-                    this[stringPreferencesKey(Constants.KEY_PRIVATE)] = encryptedPrivateKey
-                }
-            }
-        }
-
-
-
-    }
 }
