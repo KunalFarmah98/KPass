@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -29,7 +30,7 @@ fun MainScreen(modifier: Modifier){
     var enterPassword by remember { mutableStateOf(false) }
     LaunchedEffect(true) {
         // if no secret key is stored, prompt for password
-        if(CryptoManager.keystore.getKey(Constants.KEY_MASTER,null)==null){
+        if(CryptoManager.privateKey ==null){
             enterPassword = true
         }
     }
@@ -55,7 +56,9 @@ fun MainScreen(modifier: Modifier){
                 Text("encrypt")
             }
 
-            Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
+            SelectionContainer {
+                Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
+            }
 
             Button(modifier = Modifier.padding(20.dp), onClick = {
                 decryptedText.value = CryptoManager.decryptData(text.value)

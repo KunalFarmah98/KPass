@@ -30,14 +30,15 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 @SuppressLint("StaticFieldLeak")
 object CryptoManager {
 
-    val keystore: KeyStore = KeyStore.getInstance("AndroidKeyStore")
+    private val keystore: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+        load(null)
+//        deleteEntry(Constants.KEY_MASTER)
+    }
     lateinit var context: Context
     private var secretKey : SecretKey? = null
-    private var privateKey: ByteArray? = null
+    var privateKey: ByteArray? = null
 
     init{
-        keystore.load(null)
-//        keystore.deleteEntry(Constants.KEY_MASTER)
         // get secretKey from keystore
         secretKey = keystore.getKey(Constants.KEY_MASTER,null) as? SecretKey
         // if secret key exists, get private key from dataStore and decrypt it
@@ -50,12 +51,10 @@ object CryptoManager {
                         privateKey = decryptAES(encryptedPrivateKey, key).toByteArray()
                     }
                     Log.d("CryptoManager", "secretKey: $secretKey")
-                    Log.d("CryptoManager", "privateKey: ${privateKey.toString()}")
+                    Log.d("CryptoManager", "privateKey: $privateKey")
                 }
             }
         }
-
-
     }
 
 
@@ -148,7 +147,7 @@ object CryptoManager {
         }
 
         Log.d("CryptoManager", "new secretKey: $secretKey")
-        Log.d("CryptoManager", "new privateKey: ${privateKey.toString()}")
+        Log.d("CryptoManager", "new privateKey: $privateKey")
 
     }
 }
