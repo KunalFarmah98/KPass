@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -17,8 +18,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.security.CryptoManager
+import com.apps.kunalfarmah.kpass.security.CryptoManager.context
+import com.apps.kunalfarmah.kpass.security.dataStore
 
 @Composable
 
@@ -28,9 +32,12 @@ fun MainScreen(modifier: Modifier){
     val decryptedText = remember { mutableStateOf("") }
     var enterPassword by remember { mutableStateOf(false) }
     LaunchedEffect(true) {
-        // if no secret key is stored, prompt for password
-        if(CryptoManager.keystore.getKey(Constants.KEY_MASTER,null)==null){
-            enterPassword = true
+        // if no private key is stored, prompt for password
+        context.dataStore.data.collect {
+            val encryptedPrivateKey = it[stringPreferencesKey(Constants.KEY_PRIVATE)]
+            if(encryptedPrivateKey.isNullOrEmpty()){
+                enterPassword = true
+            }
         }
     }
     if(enterPassword){
@@ -54,11 +61,14 @@ fun MainScreen(modifier: Modifier){
             }) {
                 Text("encrypt")
             }
-
-            Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
+            SelectionContainer() {
+                Column {
+                    Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
+                }
+            }
 
             Button(modifier = Modifier.padding(20.dp), onClick = {
-                decryptedText.value = CryptoManager.decryptData(encryptedText.value)
+                decryptedText.value = CryptoManager.decryptData(text.value)
             }) {
                 Text("decrypt")
             }
