@@ -5,27 +5,11 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import com.apps.kunalfarmah.kpass.constant.Constants
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.security.KeyStore
-import java.security.SecureRandom
-import java.security.spec.KeySpec
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.PBEKeySpec
-import javax.crypto.spec.SecretKeySpec
-
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @SuppressLint("StaticFieldLeak")
 object CryptoManager {
@@ -36,9 +20,11 @@ object CryptoManager {
     private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC
     private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
     private const val TRANSFORMATION = "$AES_ALGORITHM/$BLOCK_MODE/$PADDING"
+    private const val KEY_MASTER = "KPass_AES_KEY"
 
     private val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
         load(null) // With load function we initialize our keystore
+//        deleteEntry(Constants.KEY_MASTER)
     }
 
 
@@ -68,12 +54,12 @@ object CryptoManager {
 
     private fun createKey(): SecretKey {
         val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-            Constants.KEY_MASTER,
+            KEY_MASTER,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setBlockModes(BLOCK_MODE)
             .setEncryptionPaddings(PADDING)
-            .setUserAuthenticationRequired(false)
+            .setUserAuthenticationRequired(true)
             .setRandomizedEncryptionRequired(true)
             .build()
 
@@ -83,7 +69,7 @@ object CryptoManager {
     }
 
     private fun getOrCreateKey(): SecretKey {
-        val existingKey = keyStore.getEntry(Constants.KEY_MASTER, null) as? KeyStore.SecretKeyEntry
+        val existingKey = keyStore.getEntry(KEY_MASTER, null) as? KeyStore.SecretKeyEntry
         val key = existingKey?.secretKey ?: createKey()
         Log.d("CryptoManager", "existingKey: $key")
         return key

@@ -1,12 +1,9 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
-val masterPass: String = gradleLocalProperties(rootDir, providers).getProperty("masterPass")
 android {
     namespace = "com.apps.kunalfarmah.kpass"
     compileSdk = 35
@@ -18,7 +15,6 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String","masterPass", masterPass)
     }
 
     buildTypes {
@@ -54,7 +50,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.biometric)
     implementation(libs.androidx.appcompat)
-    implementation(libs.datastore)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
