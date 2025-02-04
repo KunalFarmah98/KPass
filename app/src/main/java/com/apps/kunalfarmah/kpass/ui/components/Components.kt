@@ -221,7 +221,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
             Row{
                 Button(onClick = {
                     onAddNewPassword(PasswordMap(websiteNameState, usernameState,
-                        websiteUrlState, CryptoManager.encrypt(passwordState)))
+                        websiteUrlState, passwordState))
                 },
                     modifier = Modifier.width(100.dp),
                     border = BorderStroke(1.dp, Color.White)
