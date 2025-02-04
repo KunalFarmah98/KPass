@@ -51,7 +51,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.biometric)
     implementation(libs.androidx.appcompat)
+    implementation(libs.koin.android)
     implementation(libs.room)
+    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit)

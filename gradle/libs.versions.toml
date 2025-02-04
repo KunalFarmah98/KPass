@@ -12,6 +12,7 @@ biometric = "1.4.0-alpha02"
 appcompat = "1.7.0"
 room = "2.6.1"
 ksp = "2.0.0-1.0.24"
+koin = "4.0.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,7 +32,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 biometric = {module = "androidx.biometric:biometric", version.ref = "biometric"}
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 room = {module = "androidx.room:room-runtime", version.ref = "room"}
+room-ktx = {module = "androidx.room:room-ktx", version.ref = "room"}
 room-compiler = {module = "androidx.room:room-compiler", version.ref = "room"}
+koin-android = {module = "io.insert-koin:koin-android", version.ref = "koin"}
 
 
 
