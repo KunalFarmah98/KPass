@@ -1,7 +1,9 @@
 package com.apps.kunalfarmah.kpass
 
 import android.app.Application
+import com.apps.kunalfarmah.kpass.di.repositoryModule
 import com.apps.kunalfarmah.kpass.di.roomModule
+import com.apps.kunalfarmah.kpass.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -14,7 +16,7 @@ class App: Application() {
         startKoin {
             androidLogger()
             androidContext(this@App)
-            modules(roomModule)
+            modules(roomModule, repositoryModule, viewModelModule)
         }
 
     }

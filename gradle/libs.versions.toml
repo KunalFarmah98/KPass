@@ -35,7 +35,7 @@ room = {module = "androidx.room:room-runtime", version.ref = "room"}
 room-ktx = {module = "androidx.room:room-ktx", version.ref = "room"}
 room-compiler = {module = "androidx.room:room-compiler", version.ref = "room"}
 koin-android = {module = "io.insert-koin:koin-android", version.ref = "koin"}
-
+lifecycle-runtime-compose = {module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx"}
 
 
 [plugins]

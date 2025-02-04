@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,21 +24,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.ui.components.MainScreen
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
+import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MainActivity : AppCompatActivity() {
+
+    private val mainViewModel: PasswordViewModel by viewModel()
 
     private val promptManager by lazy {
         BiometricPromptManager(this)
@@ -91,9 +92,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
                 { innerPadding ->
-                    val biometricResult by promptManager.promptResults.collectAsState(
-                        initial = null
-                    )
+                    val biometricResult by promptManager.promptResults.collectAsState(null)
                     val enrollLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.StartActivityForResult(),
                         onResult = {
@@ -164,24 +163,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-}
-
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KPassTheme {
-        Greeting("Android")
     }
 }
