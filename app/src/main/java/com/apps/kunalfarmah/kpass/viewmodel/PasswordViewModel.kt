@@ -12,13 +12,30 @@ import kotlinx.coroutines.launch
 
 class PasswordViewModel(private val passwordRepository: PasswordRepository): ViewModel() {
 
-    val _passwords = MutableStateFlow<DataModel<List<PasswordMap>>>(DataModel.Loading())
+    private val _passwords = MutableStateFlow<DataModel<List<PasswordMap>>>(DataModel.Loading())
     val passwords = _passwords.asStateFlow()
+    private val _openPasswordDialog = MutableStateFlow(false)
+    val openPasswordDialog = _openPasswordDialog.asStateFlow()
+    private val _currentItem = MutableStateFlow<PasswordMap?>(null)
+    val currentItem = _currentItem.asStateFlow()
+
+
+    fun openPasswordDialog(currentItem: PasswordMap ?= null){
+        _openPasswordDialog.value = true
+        if(currentItem != null)
+            _currentItem.value = currentItem
+    }
+
+    fun closePasswordDialog(){
+        _openPasswordDialog.value = false
+        _currentItem.value = null
+    }
 
 
     fun insertOrUpdatePassword(websiteName: String, websiteUrl: String?, username: String, password: String){
         viewModelScope.launch(Dispatchers.IO) {
             passwordRepository.insertOrUpdatePassword(websiteName, websiteUrl, username, password)
+            _passwords.value = DataModel.Success(passwordRepository.getAllPasswords())
         }
     }
 
@@ -31,6 +48,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     fun deletePassword(username: String){
         viewModelScope.launch(Dispatchers.IO) {
             passwordRepository.deletePassword(username)
+            _passwords.value = DataModel.Success(passwordRepository.getAllPasswords())
         }
     }
 

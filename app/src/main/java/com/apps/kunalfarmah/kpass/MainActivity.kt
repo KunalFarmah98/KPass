@@ -29,11 +29,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
-import com.apps.kunalfarmah.kpass.ui.components.MainScreen
+import com.apps.kunalfarmah.kpass.ui.components.AddPassword
+import com.apps.kunalfarmah.kpass.ui.components.HomeScreen
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -56,6 +56,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun export(passwords: List<PasswordMap> = listOf()){
+
+    }
+
+    fun openPasswordDialog(){
 
     }
 
@@ -89,18 +93,19 @@ class MainActivity : AppCompatActivity() {
                                 actionIconContentColor = Color.White
                             )
                         )
-                    }
+                    },
+                    floatingActionButton = {AddPassword({mainViewModel.openPasswordDialog()})}
                 )
                 { innerPadding ->
                     val biometricResult by promptManager.promptResults.collectAsState(null)
                     val enrollLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.StartActivityForResult(),
                         onResult = {
-                            authenticate()
+                            //authenticate()
                         }
                     )
                     LaunchedEffect(true) {
-                        authenticate()
+                        //authenticate()
                     }
                     LaunchedEffect(biometricResult) {
                         if (biometricResult is BiometricPromptManager.BiometricResult.AuthenticationNotSet) {
@@ -116,50 +121,52 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    biometricResult?.let { result ->
-                        when (result) {
-                            is BiometricPromptManager.BiometricResult.AuthenticationError -> {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Authentication failed due to ${result.error}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                    HomeScreen(Modifier.padding(innerPadding), mainViewModel)
 
-                            BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Authentication failed, please try again",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-
-                            BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
-                                MainScreen(Modifier.padding(innerPadding))
-                            }
-
-                            BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Biometric Feature unavailable",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                finish()
-                            }
-
-                            BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Biometric Hardware unavailable",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                finish()
-                            }
-
-                            else -> {}
-
-                        }
-                    }
+//                    biometricResult?.let { result ->
+//                        when (result) {
+//                            is BiometricPromptManager.BiometricResult.AuthenticationError -> {
+//                                Toast.makeText(
+//                                    applicationContext,
+//                                    "Authentication failed due to ${result.error}",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                            }
+//
+//                            BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
+//                                Toast.makeText(
+//                                    applicationContext,
+//                                    "Authentication failed, please try again",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                            }
+//
+//                            BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
+//                                HomeScreen(Modifier.padding(innerPadding), mainViewModel)
+//                            }
+//
+//                            BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
+//                                Toast.makeText(
+//                                    applicationContext,
+//                                    "Biometric Feature unavailable",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                                finish()
+//                            }
+//
+//                            BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
+//                                Toast.makeText(
+//                                    applicationContext,
+//                                    "Biometric Hardware unavailable",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                                finish()
+//                            }
+//
+//                            else -> {}
+//
+//                        }
+//                    }
                 }
             }
         }

@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 @Entity
 data class PasswordMap(
     @PrimaryKey
-    val websiteName: String,
+    val websiteName: String = "",
     val websiteUrl: String?="",
-    val username: String,
-    val password: String
+    val username: String = "",
+    val password: String = ""
 )
