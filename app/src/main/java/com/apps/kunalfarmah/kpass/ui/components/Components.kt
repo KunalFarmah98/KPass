@@ -151,93 +151,110 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
         }
     }
 
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .padding(20.dp)
-        .background(Color.White),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = Color.White)
-    ) {
-        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                text = "Add New Password",
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+                .background(Color.White),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+            elevation = CardDefaults.elevatedCardElevation(2.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White
             )
-            TextField(
-                label = "WebsiteName",
-                placeholder = "Enter website or app's name here",
-                onValueChange = { text ->
-                    websiteNameState = text
-                },
-                keyboardType = KeyboardType.Text,
-                value = websiteNameState,
-                readOnly = readOnly,
-                trailingIcon = trailingIcon,
-                onTrailingIconClick = onTrailingIconClick
-            )
-            TextField(
-                label = "WebsiteUrl",
-                placeholder = "Enter website's url here",
-                onValueChange = { text ->
-                    websiteUrlState = text
-                },
-                keyboardType = KeyboardType.Text,
-                value = websiteUrlState,
-                readOnly = readOnly,
-                trailingIcon = trailingIcon,
-                onTrailingIconClick = onTrailingIconClick
-            )
-            TextField(
-                label = "Username",
-                placeholder = "Enter your username here",
-                onValueChange = { text ->
-                    usernameState = text
-                },
-                keyboardType = KeyboardType.Email,
-                value = usernameState,
-                trailingIcon = trailingIcon,
-                onTrailingIconClick = onTrailingIconClick
-            )
-            TextField(
-                label = "Password",
-                placeholder = "Enter your password here",
-                onValueChange = { text ->
-                    passwordState = text
-                },
-                keyboardType = KeyboardType.Password,
-                value = passwordState,
-                trailingIcon = trailingIcon,
-                onTrailingIconClick = onTrailingIconClick
-            )
-            Spacer(Modifier.height(20.dp))
-            Row{
-                Button(onClick = {
-                    onAddNewPassword(PasswordMap(websiteNameState, usernameState,
-                        websiteUrlState, passwordState))
-                },
-                    modifier = Modifier.width(100.dp),
-                    border = BorderStroke(1.dp, Color.White)
-                ) {
-                    Text("Save")
-                }
-                Spacer(Modifier.width(25.dp))
-                Button(onClick = onClose,
-                    modifier = Modifier.width(100.dp),
-                    border = BorderStroke(1.dp, Color.White)
-                ) {
-                    Text("Cancel")
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = "Add New Password",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                TextField(
+                    label = "WebsiteName",
+                    placeholder = "Enter website or app's name here",
+                    onValueChange = { text ->
+                        websiteNameState = text
+                    },
+                    keyboardType = KeyboardType.Text,
+                    value = websiteNameState,
+                    readOnly = readOnly,
+                    trailingIcon = trailingIcon,
+                    onTrailingIconClick = onTrailingIconClick
+                )
+                TextField(
+                    label = "WebsiteUrl",
+                    placeholder = "Enter website's url here",
+                    onValueChange = { text ->
+                        websiteUrlState = text
+                    },
+                    keyboardType = KeyboardType.Text,
+                    value = websiteUrlState,
+                    readOnly = readOnly,
+                    trailingIcon = trailingIcon,
+                    onTrailingIconClick = onTrailingIconClick
+                )
+                TextField(
+                    label = "Username",
+                    placeholder = "Enter your username here",
+                    onValueChange = { text ->
+                        usernameState = text
+                    },
+                    keyboardType = KeyboardType.Email,
+                    value = usernameState,
+                    trailingIcon = trailingIcon,
+                    onTrailingIconClick = onTrailingIconClick
+                )
+                TextField(
+                    label = "Password",
+                    placeholder = "Enter your password here",
+                    onValueChange = { text ->
+                        passwordState = text
+                    },
+                    keyboardType = KeyboardType.Password,
+                    value = passwordState,
+                    trailingIcon = trailingIcon,
+                    onTrailingIconClick = onTrailingIconClick
+                )
+                Spacer(Modifier.height(20.dp))
+                Row {
+                    Button(
+                        onClick = {
+                            onAddNewPassword(
+                                PasswordMap(
+                                    websiteNameState, usernameState,
+                                    websiteUrlState, passwordState
+                                )
+                            )
+                        },
+                        modifier = Modifier.width(100.dp),
+                        border = BorderStroke(1.dp, Color.White)
+                    ) {
+                        Text("Save")
+                    }
+                    Spacer(Modifier.width(25.dp))
+                    Button(
+                        onClick = onClose,
+                        modifier = Modifier.width(100.dp),
+                        border = BorderStroke(1.dp, Color.White)
+                    ) {
+                        Text("Cancel")
+                    }
+
                 }
 
             }
-
         }
     }
 }

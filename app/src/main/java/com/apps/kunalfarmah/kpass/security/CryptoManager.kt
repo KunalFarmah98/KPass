@@ -24,7 +24,7 @@ object CryptoManager {
 
     private val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
         load(null) // With load function we initialize our keystore
-//        deleteEntry(Constants.KEY_MASTER)
+//        deleteEntry(KEY_MASTER)
     }
 
 

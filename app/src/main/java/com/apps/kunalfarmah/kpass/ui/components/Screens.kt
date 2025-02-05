@@ -6,14 +6,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -32,7 +27,7 @@ import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
 
 @Composable
 
-fun MainScreen(modifier: Modifier){
+fun MainScreen(modifier: Modifier) {
     val text = remember { mutableStateOf("") }
     val encryptedText = remember { mutableStateOf("") }
     val decryptedText = remember { mutableStateOf("") }
@@ -71,7 +66,7 @@ fun MainScreen(modifier: Modifier){
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel){
+fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
     val openPassDialog by viewModel.openPasswordDialog.collectAsStateWithLifecycle(false)
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
@@ -80,44 +75,59 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel){
         viewModel.getAllPasswords()
     }
 
-    Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-
-        when(passwords){
-            is DataModel.Error -> {
+    when (passwords) {
+        is DataModel.Error -> {
+            Column(
+                modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(text = "Error")
-            }
-            is DataModel.Loading -> {
-                CircularProgressIndicator()
-                }
-            is DataModel.Success -> {
-                if (openPassDialog) {
-                    // this will open the dialog with the current data if it exists or prompt to save password
-                    AddOrEditPasswordDialog(
-                        currentItem = currentItem,
-                        onAddNewPassword = {
-                            if(currentItem != null) {
-                                viewModel.insertOrUpdatePassword(
-                                    currentItem!!.websiteName,
-                                    currentItem!!.websiteUrl,
-                                    currentItem!!.username,
-                                    currentItem!!.password
-                                )
-                            }
-                            viewModel.closePasswordDialog()
-                        },
-                        onClose = {
-                            viewModel.closePasswordDialog()
-                        }
-                    )
-                } else {
-                    PasswordsList(passwords = (passwords as DataModel.Success).data, onItemClick = {data: PasswordMap ->
-                        viewModel.openPasswordDialog(data)
-                    })
-                }
             }
         }
 
+        is DataModel.Loading -> {
+            Column(
+                modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(Modifier.size(50.dp))
+            }
+        }
+
+        is DataModel.Success -> {
+            if (openPassDialog) {
+                // this will open the dialog with the current data if it exists or prompt to save password
+                AddOrEditPasswordDialog(
+                    currentItem = currentItem,
+                    onAddNewPassword = { data: PasswordMap ->
+                            viewModel.insertOrUpdatePassword(
+                                data.websiteName,
+                                data.websiteUrl,
+                                data.username,
+                                data.password
+                            )
+                        viewModel.closePasswordDialog()
+                    },
+                    onClose = {
+                        viewModel.closePasswordDialog()
+                    }
+                )
+            } else {
+                Column(
+                    modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+
+                    PasswordsList(
+                        passwords = (passwords as DataModel.Success).data,
+                        onItemClick = { data: PasswordMap ->
+                            viewModel.openPasswordDialog(data)
+                        })
+                }
+            }
+        }
     }
-
-
 }
