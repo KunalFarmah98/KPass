@@ -69,6 +69,7 @@ fun MainScreen(modifier: Modifier) {
 fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
     val openPassDialog by viewModel.openPasswordDialog.collectAsStateWithLifecycle(false)
+    val openConfirmationDialog by viewModel.openConfirmationDialog.collectAsStateWithLifecycle(false)
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
@@ -114,7 +115,23 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
                         viewModel.closePasswordDialog()
                     }
                 )
-            } else {
+            }
+            else if(openConfirmationDialog){
+                ConfirmationDialog(
+                    title = "Delete Password",
+                    body = "Are you sure you want to delete this password?\nIt can not be recovered again",
+                    onPositiveClick = {
+                        if (currentItem != null) {
+                            viewModel.deletePassword(currentItem!!.username)
+                            viewModel.closeConfirmationDialog()
+                        }
+                    },
+                    onNegativeClick = {
+                        viewModel.closeConfirmationDialog()
+                    }
+                )
+            }
+            else {
                 Column(
                     modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,9 +140,11 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
 
                     PasswordsList(
                         passwords = (passwords as DataModel.Success).data,
-                        onItemClick = { data: PasswordMap ->
+                        onEditClick = { data: PasswordMap ->
                             viewModel.openPasswordDialog(data)
-                        })
+                        },
+                        onDeleteClick = { data: PasswordMap -> viewModel.openConfirmationDialog(data) }
+                    )
                 }
             }
         }

@@ -16,8 +16,11 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     val passwords = _passwords.asStateFlow()
     private val _openPasswordDialog = MutableStateFlow(false)
     val openPasswordDialog = _openPasswordDialog.asStateFlow()
+    private val _openConfirmationDialog = MutableStateFlow(false)
+    val openConfirmationDialog = _openConfirmationDialog.asStateFlow()
     private val _currentItem = MutableStateFlow<PasswordMap?>(null)
     val currentItem = _currentItem.asStateFlow()
+
 
 
     fun openPasswordDialog(currentItem: PasswordMap ?= null){
@@ -29,6 +32,15 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     fun closePasswordDialog(){
         _openPasswordDialog.value = false
         _currentItem.value = null
+    }
+
+    fun openConfirmationDialog(data: PasswordMap){
+        _openConfirmationDialog.value = true
+        _currentItem.value = data
+    }
+
+    fun closeConfirmationDialog(){
+        _openConfirmationDialog.value = false
     }
 
 

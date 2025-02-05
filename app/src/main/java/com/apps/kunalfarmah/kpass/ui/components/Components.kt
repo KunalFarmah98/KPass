@@ -23,7 +23,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -43,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +60,11 @@ import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.CryptoManager
 
 @Composable
-fun PasswordsList(passwords: List<PasswordMap>, onItemClick: (data: PasswordMap) -> Unit = {}) {
-    if(passwords.isEmpty()){
+fun PasswordsList(
+    passwords: List<PasswordMap>, onItemClick: (data: PasswordMap) -> Unit = {},
+    onEditClick: (data: PasswordMap) -> Unit = {}, onDeleteClick: (data: PasswordMap) -> Unit = {}
+) {
+    if (passwords.isEmpty()){
         NoPasswords()
     }
     else {
@@ -66,7 +73,7 @@ fun PasswordsList(passwords: List<PasswordMap>, onItemClick: (data: PasswordMap)
             contentPadding = PaddingValues(10.dp)
         ) {
             items(items = passwords, key = { it.websiteName + it.username }) {
-                PasswordItem(it, onItemClick)
+                PasswordItem(it, onItemClick, onEditClick, onDeleteClick)
             }
         }
     }
@@ -74,7 +81,12 @@ fun PasswordsList(passwords: List<PasswordMap>, onItemClick: (data: PasswordMap)
 
 
 @Composable
-fun PasswordItem(password: PasswordMap, onItemClick: (data: PasswordMap) -> Unit = {}) {
+fun PasswordItem(
+    password: PasswordMap,
+    onItemClick: (data: PasswordMap) -> Unit = {},
+    onEditClick: (data: PasswordMap) -> Unit = {},
+    onDeleteClick: (data: PasswordMap) -> Unit = {}
+) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 5.dp)
@@ -88,15 +100,79 @@ fun PasswordItem(password: PasswordMap, onItemClick: (data: PasswordMap) -> Unit
         Column {
             Text(modifier = Modifier.padding(10.dp), text = password.websiteName)
             Spacer(Modifier.height(10.dp))
-            Row(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 10.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+            Row(modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Filled.Person, contentDescription = "person")
+                Icon(modifier =  Modifier.weight(1f), imageVector = Icons.Filled.Person, contentDescription = "person")
                 Spacer(Modifier.width(20.dp))
-                Text(password.username)
-                Spacer(Modifier.width(20.dp))
-                Image(painterResource(R.drawable.baseline_visibility_off_24), contentDescription = "view")
+                Text(modifier = Modifier.weight(5f), text = password.username, maxLines = 2)
+                Spacer(modifier = Modifier.width(20.dp))
+                Image(modifier = Modifier.weight(1f), painter = painterResource(R.drawable.baseline_visibility_off_24), contentDescription = "view", colorFilter = ColorFilter.tint(Color.Black))
+                Spacer(Modifier.width(5.dp))
+                IconButton(modifier = Modifier.weight(1f), onClick = {onEditClick(password)}) {
+                    Icon(Icons.Filled.Edit, "edit", tint = Color.Black)
+                }
+                Spacer(Modifier.width(5.dp))
+                IconButton(modifier = Modifier.weight(1f), onClick = {onDeleteClick(password)}) {
+                    Icon(Icons.Filled.Delete, "delete", tint = Color.Black)
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ConfirmationDialog(
+    title: String = "title",
+    body: String = "body",
+    onPositiveClick: () -> Unit = {},
+    onNegativeClick: () -> Unit = {}
+) {
+    Column(Modifier.fillMaxSize().background(Color.Transparent), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+            elevation = CardDefaults.elevatedCardElevation(2.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = body,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = onPositiveClick) {
+                        Text("Confirm")
+                    }
+                    Spacer(Modifier.width(25.dp))
+                    Button(onClick = onNegativeClick) {
+                        Text("Cancel")
+                    }
+                }
             }
         }
     }
@@ -151,7 +227,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
         }
     }
 
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(Modifier.fillMaxSize().background(Color.Transparent), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
 
         Card(
             modifier = Modifier
