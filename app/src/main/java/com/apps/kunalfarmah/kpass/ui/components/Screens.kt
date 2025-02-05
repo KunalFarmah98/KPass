@@ -167,10 +167,10 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
             currentItem = currentItem,
             onAddNewPassword = { data: PasswordMap ->
                 viewModel.insertOrUpdatePassword(
-                    data.websiteName,
-                    data.websiteUrl,
-                    data.username,
-                    data.password
+                    websiteUrl = data.websiteUrl,
+                    websiteName = data.websiteName,
+                    username = data.username,
+                    password = data.password
                 )
                 viewModel.closeAddOrEditPasswordDialog()
             },

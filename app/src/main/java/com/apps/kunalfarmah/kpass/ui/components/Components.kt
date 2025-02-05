@@ -332,8 +332,10 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                         onClick = {
                             onAddNewPassword(
                                 PasswordMap(
-                                    websiteNameState, usernameState,
-                                    websiteUrlState, passwordState
+                                    websiteName = websiteNameState,
+                                    websiteUrl = websiteUrlState,
+                                    username = usernameState,
+                                    password = CryptoManager.encrypt(passwordState)
                                 )
                             )
                         },
@@ -455,14 +457,14 @@ fun TextField(label: String = "", placeholder: String = "", value: String = "", 
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedTextColor = Color.Black,
-            focusedTextColor = Color.DarkGray,
-            focusedLabelColor = Color.Black,
-            focusedBorderColor = Color.DarkGray,
-            unfocusedLabelColor = Color.DarkGray,
+            unfocusedTextColor = Color.Gray,
+            focusedTextColor = Color.Black,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = Color.Gray,
             unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-            focusedPlaceholderColor = Color.LightGray,
-            unfocusedPlaceholderColor = Color.LightGray,
+            focusedPlaceholderColor = Color.Gray,
+            unfocusedPlaceholderColor = Color.Gray,
             cursorColor = Color.Black,
             errorTextColor = Color.Red,
             errorLabelColor = Color.Red,
