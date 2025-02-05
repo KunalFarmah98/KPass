@@ -59,8 +59,6 @@ object CryptoManager {
         )
             .setBlockModes(BLOCK_MODE)
             .setEncryptionPaddings(PADDING)
-            .setUserAuthenticationRequired(true)
-            .setRandomizedEncryptionRequired(true)
             .build()
 
         return KeyGenerator.getInstance(AES_ALGORITHM).apply {
@@ -69,8 +67,8 @@ object CryptoManager {
     }
 
     private fun getOrCreateKey(): SecretKey {
-        val existingKey = keyStore.getEntry(KEY_MASTER, null) as? KeyStore.SecretKeyEntry
-        val key = existingKey?.secretKey ?: createKey()
+        val existingKey = keyStore.getKey(KEY_MASTER, null) as? SecretKey
+        val key = existingKey ?: createKey()
         Log.d("CryptoManager", "existingKey: $key")
         return key
     }
