@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                     },
-                    floatingActionButton = {AddPassword { mainViewModel.openPasswordDialog() } }
+                    floatingActionButton = {AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
                     val biometricResult by promptManager.promptResults.collectAsState(null)

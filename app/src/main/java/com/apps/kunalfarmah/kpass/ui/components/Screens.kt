@@ -146,7 +146,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
                     passwords = (passwords as DataModel.Success).data,
                     onEditClick = { data: PasswordMap ->
                         if (!isDialogOpen)
-                            viewModel.openPasswordDialog(data)
+                            viewModel.openAddOrEditPasswordDialog(data)
                     },
                     onDeleteClick = { data: PasswordMap ->
                         if (!isDialogOpen)
@@ -172,10 +172,10 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
                     data.username,
                     data.password
                 )
-                viewModel.closePasswordDialog()
+                viewModel.closeAddOrEditPasswordDialog()
             },
             onClose = {
-                viewModel.closePasswordDialog()
+                viewModel.closeAddOrEditPasswordDialog()
             }
         )
     } else if (openConfirmationDialog) {

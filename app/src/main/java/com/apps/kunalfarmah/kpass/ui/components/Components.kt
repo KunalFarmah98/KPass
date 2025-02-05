@@ -257,11 +257,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                 .background(Color.White),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             elevation = CardDefaults.elevatedCardElevation(2.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White
-            )
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(
                 modifier = Modifier.padding(10.dp),
@@ -276,7 +272,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                     text = "Add New Password",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color.Black
                 )
                 TextField(
                     label = "WebsiteName",
@@ -451,20 +447,18 @@ fun TextField(label: String = "", placeholder: String = "", value: String = "", 
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedTextColor = Color.White,
-            focusedTextColor = Color.White,
-            focusedLabelColor = Color.White,
-            focusedBorderColor = Color.White,
-            unfocusedLabelColor = Color.White,
-            unfocusedBorderColor = Color.White,
+            unfocusedTextColor = Color.Black,
+            focusedTextColor = Color.DarkGray,
+            focusedLabelColor = Color.Black,
+            focusedBorderColor = Color.DarkGray,
+            unfocusedLabelColor = Color.DarkGray,
+            unfocusedBorderColor = MaterialTheme.colorScheme.primary,
             focusedPlaceholderColor = Color.LightGray,
             unfocusedPlaceholderColor = Color.LightGray,
-            cursorColor = Color.White,
+            cursorColor = Color.Black,
             errorTextColor = Color.Red,
             errorLabelColor = Color.Red,
-            errorBorderColor = Color.Red,
-            unfocusedContainerColor = MaterialTheme.colorScheme.primary,
-            focusedContainerColor = MaterialTheme.colorScheme.primary,
+            errorBorderColor = Color.Red
         ),
         trailingIcon = {
             if (trailingIcon != null) {

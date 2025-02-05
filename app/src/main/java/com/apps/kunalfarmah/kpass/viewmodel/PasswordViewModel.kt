@@ -26,7 +26,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
 
 
 
-    fun openPasswordDialog(currentItem: PasswordMap ?= null){
+    fun openAddOrEditPasswordDialog(currentItem: PasswordMap ?= null){
         viewModelScope.launch {
             _dialogController.emit(DialogModel.AddDialog(true))
             _dialogController.emit(DialogModel.DetailsDialog(false))
@@ -36,7 +36,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
             _currentItem.value = currentItem
     }
 
-    fun closePasswordDialog(){
+    fun closeAddOrEditPasswordDialog(){
         viewModelScope.launch {
             _dialogController.emit(DialogModel.AddDialog(false))
         }
@@ -54,6 +54,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
         viewModelScope.launch {
             _dialogController.emit(DialogModel.ConfirmationDialog(false))
         }
+        _currentItem.value = null
     }
 
     fun openPasswordDetailDialog(data: PasswordMap){
@@ -67,6 +68,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
         viewModelScope.launch {
             _dialogController.emit(DialogModel.DetailsDialog(false))
         }
+        _currentItem.value = null
     }
 
 
