@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +28,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -48,16 +46,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RenderEffect
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -86,8 +80,7 @@ fun PasswordsList(
     }
     else {
         LazyColumn(
-            modifier = Modifier.padding(20.dp),
-            contentPadding = PaddingValues(10.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             items(items = passwords, key = { it.websiteName + it.username }) {
                 PasswordItem(it, onItemClick, onEditClick, onDeleteClick)
@@ -106,33 +99,44 @@ fun PasswordItem(
 ) {
     Card(modifier = Modifier
         .fillMaxWidth()
-        .padding(vertical = 5.dp)
+        .padding(vertical = 10.dp)
         .clickable {
             onItemClick(password)
         },
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         elevation = CardDefaults.elevatedCardElevation(2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-            Text(modifier = Modifier.padding(10.dp), text = password.websiteName)
+            Text(modifier = Modifier.padding(20.dp), fontSize = 18.sp, text = password.websiteName, fontWeight = FontWeight.Bold, color = Color.Black)
             Spacer(Modifier.height(10.dp))
             Row(modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp, bottom = 10.dp)
+                .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
                 .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(modifier =  Modifier.weight(1f), imageVector = Icons.Filled.Person, contentDescription = "person")
+                Icon(modifier =  Modifier
+                    .weight(1f)
+                    .size(20.dp), imageVector = Icons.Filled.Person, contentDescription = "person", tint = Color.Black)
                 Spacer(Modifier.width(20.dp))
-                Text(modifier = Modifier.weight(5f), text = password.username, maxLines = 2)
+                Text(modifier = Modifier.weight(5f), text = password.username, maxLines = 2, fontSize = 16.sp)
                 Spacer(modifier = Modifier.width(20.dp))
-                Image(modifier = Modifier.weight(1f), painter = painterResource(R.drawable.baseline_visibility_off_24), contentDescription = "view", colorFilter = ColorFilter.tint(Color.Black))
+                Image(modifier = Modifier
+                    .weight(1f)
+                    .size(20.dp)
+                    .clickable {
+                        onItemClick(password)
+                    }, painter = painterResource(R.drawable.baseline_visibility_24), contentDescription = "view", colorFilter = ColorFilter.tint(Color.Black))
                 Spacer(Modifier.width(5.dp))
-                IconButton(modifier = Modifier.weight(1f), onClick = {onEditClick(password)}) {
+                IconButton(modifier = Modifier
+                    .weight(1f)
+                    .size(20.dp), onClick = {onEditClick(password)}) {
                     Icon(Icons.Filled.Edit, "edit", tint = Color.Black)
                 }
                 Spacer(Modifier.width(5.dp))
-                IconButton(modifier = Modifier.weight(1f), onClick = {onDeleteClick(password)}) {
+                IconButton(modifier = Modifier
+                    .weight(1f)
+                    .size(20.dp), onClick = {onDeleteClick(password)}) {
                     Icon(Icons.Filled.Delete, "delete", tint = Color.Black)
                 }
             }
@@ -156,7 +160,7 @@ fun ConfirmationDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
             elevation = CardDefaults.elevatedCardElevation(2.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -185,11 +189,11 @@ fun ConfirmationDialog(
 
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = onPositiveClick) {
-                        Text("Confirm")
+                        Text(stringResource(R.string.confirm))
                     }
                     Spacer(Modifier.width(25.dp))
                     Button(onClick = onNegativeClick) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             }
@@ -200,8 +204,8 @@ fun ConfirmationDialog(
 @Composable
 fun NoPasswords(){
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("You haven't stored any passwords yet")
-        Text("Start by clicking the + icon")
+        Text(stringResource(R.string.you_haven_t_stored_any_passwords_yet))
+        Text(stringResource(R.string.start_by_clicking_the_icon))
     }
 }
 
@@ -246,16 +250,18 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
         }
     }
 
-    Column(Modifier
-        .fillMaxSize()
-        .background(Color.Transparent), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .background(Color.White),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp)
+            .background(Color.Transparent),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
             elevation = CardDefaults.elevatedCardElevation(2.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -269,7 +275,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                         .padding(10.dp)
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = "Add New Password",
+                    text = "Save a Password",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -331,18 +337,16 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                                 )
                             )
                         },
-                        modifier = Modifier.width(100.dp),
-                        border = BorderStroke(1.dp, Color.White)
+                        modifier = Modifier.width(100.dp)
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.save))
                     }
                     Spacer(Modifier.width(25.dp))
                     Button(
                         onClick = onClose,
-                        modifier = Modifier.width(100.dp),
-                        border = BorderStroke(1.dp, Color.White)
+                        modifier = Modifier.width(100.dp)
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
 
                 }
@@ -381,11 +385,11 @@ fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {})
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = data?.websiteUrl ?: "",
                     fontSize = 14.sp,
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -397,8 +401,10 @@ fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {})
                         color = Color.Black,
                         textAlign = TextAlign.Start,
                     )
-                    IconButton(modifier = Modifier.weight(1f).size(20.dp), onClick = {
-                        context.copyToClipboard("KPass_username", data?.username?:"")
+                    IconButton(modifier = Modifier
+                        .weight(1f)
+                        .size(20.dp), onClick = {
+                        context.copyToClipboard("username", data?.username?:"")
                     }) {
                         Image(painterResource(R.drawable.baseline_content_copy_24), contentDescription = "copy", colorFilter = ColorFilter.tint(Color.Black))
                     }
@@ -413,9 +419,11 @@ fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {})
                         textAlign = TextAlign.Start
                     )
                     IconButton(
-                        modifier = Modifier.weight(1f).size(20.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .size(20.dp),
                         onClick = {
-                        context.copyToClipboard("KPass_password", password)
+                        context.copyToClipboard("password", password)
                     }) {
                         Image(painterResource(R.drawable.baseline_content_copy_24), contentDescription = "copy", colorFilter = ColorFilter.tint(Color.Black))
                     }
