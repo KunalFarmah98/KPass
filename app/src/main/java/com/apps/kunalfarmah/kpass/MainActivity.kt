@@ -5,7 +5,6 @@ import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDEN
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -59,10 +58,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun openPasswordDialog(){
-
-    }
-
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                     },
-                    floatingActionButton = {AddPassword({mainViewModel.openPasswordDialog()})}
+                    floatingActionButton = {AddPassword { mainViewModel.openPasswordDialog() } }
                 )
                 { innerPadding ->
                     val biometricResult by promptManager.promptResults.collectAsState(null)

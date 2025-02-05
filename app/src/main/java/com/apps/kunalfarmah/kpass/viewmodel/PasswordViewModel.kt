@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.model.DataModel
+import com.apps.kunalfarmah.kpass.model.DialogModel
 import com.apps.kunalfarmah.kpass.repository.PasswordRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -14,33 +17,56 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
 
     private val _passwords = MutableStateFlow<DataModel<List<PasswordMap>>>(DataModel.Loading())
     val passwords = _passwords.asStateFlow()
-    private val _openPasswordDialog = MutableStateFlow(false)
-    val openPasswordDialog = _openPasswordDialog.asStateFlow()
-    private val _openConfirmationDialog = MutableStateFlow(false)
-    val openConfirmationDialog = _openConfirmationDialog.asStateFlow()
+
+    private val _dialogController = MutableSharedFlow<DialogModel<Boolean>>()
+    val dialogController = _dialogController.asSharedFlow()
+
     private val _currentItem = MutableStateFlow<PasswordMap?>(null)
     val currentItem = _currentItem.asStateFlow()
 
 
 
     fun openPasswordDialog(currentItem: PasswordMap ?= null){
-        _openPasswordDialog.value = true
+        viewModelScope.launch {
+            _dialogController.emit(DialogModel.AddDialog(true))
+            _dialogController.emit(DialogModel.DetailsDialog(false))
+            _dialogController.emit(DialogModel.ConfirmationDialog(false))
+        }
         if(currentItem != null)
             _currentItem.value = currentItem
     }
 
     fun closePasswordDialog(){
-        _openPasswordDialog.value = false
+        viewModelScope.launch {
+            _dialogController.emit(DialogModel.AddDialog(false))
+        }
         _currentItem.value = null
     }
 
     fun openConfirmationDialog(data: PasswordMap){
-        _openConfirmationDialog.value = true
+        viewModelScope.launch {
+            _dialogController.emit(DialogModel.ConfirmationDialog(true))
+        }
         _currentItem.value = data
     }
 
     fun closeConfirmationDialog(){
-        _openConfirmationDialog.value = false
+        viewModelScope.launch {
+            _dialogController.emit(DialogModel.ConfirmationDialog(false))
+        }
+    }
+
+    fun openPasswordDetailDialog(data: PasswordMap){
+        viewModelScope.launch {
+            _dialogController.emit(DialogModel.DetailsDialog(true))
+        }
+        _currentItem.value = data
+    }
+
+    fun closePasswordDetailDialog(){
+        viewModelScope.launch {
+            _dialogController.emit(DialogModel.DetailsDialog(false))
+        }
     }
 
 
