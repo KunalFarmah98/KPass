@@ -335,7 +335,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                                     websiteName = websiteNameState,
                                     websiteUrl = websiteUrlState,
                                     username = usernameState,
-                                    password = CryptoManager.encrypt(passwordState)
+                                    password = passwordState
                                 )
                             )
                         },
