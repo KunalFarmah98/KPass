@@ -7,8 +7,8 @@ sealed class DataModel<T> {
 }
 
 sealed class DialogModel<T> {
-    data class AddDialog<T>(val data: T) : DialogModel<T>()
-    data class EditDialog<T>(val data: T) : DialogModel<T>()
-    data class ConfirmationDialog<T>(val data: T) : DialogModel<T>()
-    data class DetailsDialog<T>(val data: T) : DialogModel<T>()
+    data class AddDialog<T>(val show: T) : DialogModel<T>()
+    data class EditDialog<T>(val show: T) : DialogModel<T>()
+    data class ConfirmationDialog<T>(val show: T) : DialogModel<T>()
+    data class DetailsDialog<T>(val show: T) : DialogModel<T>()
 }

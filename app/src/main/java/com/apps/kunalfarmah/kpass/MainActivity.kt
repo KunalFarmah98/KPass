@@ -26,6 +26,9 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.apps.kunalfarmah.kpass.db.PasswordMap
@@ -66,6 +69,9 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             KPassTheme {
+                var fabEnabled by rememberSaveable {
+                    mutableStateOf(true)
+                }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
@@ -89,7 +95,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                     },
-                    floatingActionButton = {AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
+                    floatingActionButton = { AddPassword { if (fabEnabled) mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
                     val biometricResult by promptManager.promptResults.collectAsState(null)
@@ -116,7 +122,9 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    HomeScreen(Modifier.padding(innerPadding), mainViewModel)
+                    HomeScreen(Modifier.padding(innerPadding), mainViewModel) { state ->
+                        fabEnabled = state
+                    }
 
 //                    biometricResult?.let { result ->
 //                        when (result) {

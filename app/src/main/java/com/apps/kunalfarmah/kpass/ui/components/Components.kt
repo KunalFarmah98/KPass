@@ -222,21 +222,30 @@ fun AddPassword(onAddNewPassword: () -> Unit = {}){
 
 @Preview
 @Composable
-fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: (passwordMap: PasswordMap) -> Unit = {}, onClose: () -> Unit = {}, isEditable: Boolean = false){
+fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: (passwordMap: PasswordMap) -> Unit = {}, onClose: () -> Unit = {}, isEditable: Boolean = false, editing: Boolean = false){
+    val name = if(editing) currentItem?.websiteName?:"" else ""
+    val url = if(editing) currentItem?.websiteUrl?:"" else ""
+    val username = if(editing) currentItem?.username?:"" else ""
+    var pass = ""
+    if (editing) {
+        currentItem?.let {
+            if (it.password.isNotEmpty()) pass = CryptoManager.decrypt(it.password)
+        }
+    }
     var websiteNameState by rememberSaveable {
-        mutableStateOf(currentItem?.websiteName ?: "")
+        mutableStateOf(name)
     }
 
     var websiteUrlState by rememberSaveable {
-        mutableStateOf(currentItem?.websiteUrl ?: "")
+        mutableStateOf(url)
     }
 
     var usernameState by rememberSaveable {
-        mutableStateOf(currentItem?.username ?: "")
+        mutableStateOf(username)
     }
 
     var passwordState by rememberSaveable {
-        mutableStateOf(if(!currentItem?.password.isNullOrEmpty()) CryptoManager.decrypt(currentItem!!.password) else "")
+        mutableStateOf(pass)
     }
 
     var readOnly by rememberSaveable {
@@ -275,7 +284,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                         .padding(10.dp)
                         .fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    text = "Save a Password",
+                    text = if(editing) "Update your password" else "Add new password",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -457,7 +466,7 @@ fun TextField(label: String = "", placeholder: String = "", value: String = "", 
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedTextColor = Color.Gray,
+            unfocusedTextColor = Color.Black,
             focusedTextColor = Color.Black,
             focusedLabelColor = MaterialTheme.colorScheme.primary,
             focusedBorderColor = MaterialTheme.colorScheme.primary,

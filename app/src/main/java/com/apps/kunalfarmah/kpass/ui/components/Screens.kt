@@ -71,11 +71,14 @@ fun MainScreen(modifier: Modifier) {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
+fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (state: Boolean) -> Unit = {}) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
 
-    var openAddOrEditPasswordDialog by rememberSaveable {
+    var openAddPasswordDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var openEditPasswordDialog by rememberSaveable {
         mutableStateOf(false)
     }
     var openConfirmationDialog by rememberSaveable {
@@ -87,7 +90,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
 
     val isDialogOpen by remember {
         derivedStateOf {
-            openAddOrEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog
+            openAddPasswordDialog || openEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog
         }
     }
 
@@ -96,19 +99,23 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
         viewModel.dialogController.collect { dialogState ->
             when (dialogState) {
                 is DialogModel.AddDialog -> {
-                    openAddOrEditPasswordDialog =dialogState.data
+                    openAddPasswordDialog = dialogState.show
                 }
                 is DialogModel.EditDialog ->{
-                    openAddOrEditPasswordDialog = dialogState.data
+                    openEditPasswordDialog = dialogState.show
                 }
                 is DialogModel.ConfirmationDialog -> {
-                    openConfirmationDialog = dialogState.data
+                    openConfirmationDialog = dialogState.show
                 }
                 is DialogModel.DetailsDialog -> {
-                    openPasswordDetailsDialog = dialogState.data
+                    openPasswordDetailsDialog = dialogState.show
                 }
             }
         }
+    }
+
+    LaunchedEffect(isDialogOpen) {
+        setFabState(!isDialogOpen)
     }
 
 
@@ -146,7 +153,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
                     passwords = (passwords as DataModel.Success).data,
                     onEditClick = { data: PasswordMap ->
                         if (!isDialogOpen)
-                            viewModel.openAddOrEditPasswordDialog(data)
+                            viewModel.openAddOrEditPasswordDialog(data, true)
                     },
                     onDeleteClick = { data: PasswordMap ->
                         if (!isDialogOpen)
@@ -161,10 +168,9 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
         }
     }
 
-    if (openAddOrEditPasswordDialog) {
-        // this will open the dialog with the current data if it exists or prompt to save password
+    if (openAddPasswordDialog) {
         AddOrEditPasswordDialog(
-            currentItem = currentItem,
+            currentItem = null,
             onAddNewPassword = { data: PasswordMap ->
                 viewModel.insertOrUpdatePassword(
                     websiteUrl = data.websiteUrl,
@@ -176,9 +182,30 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel) {
             },
             onClose = {
                 viewModel.closeAddOrEditPasswordDialog()
-            }
+            },
+            editing = false
         )
-    } else if (openConfirmationDialog) {
+
+    }
+    else if(openEditPasswordDialog){
+        AddOrEditPasswordDialog(
+            currentItem = currentItem,
+            onAddNewPassword = { data: PasswordMap ->
+                viewModel.insertOrUpdatePassword(
+                    websiteUrl = data.websiteUrl,
+                    websiteName = data.websiteName,
+                    username = data.username,
+                    password = data.password
+                )
+                viewModel.closeAddOrEditPasswordDialog(true)
+            },
+            onClose = {
+                viewModel.closeAddOrEditPasswordDialog(true)
+            },
+            editing = true
+        )
+    }
+    else if (openConfirmationDialog) {
         ConfirmationDialog(
             title = "Delete Password",
             body = "Are you sure you want to delete this password?\nIt can not be recovered again",

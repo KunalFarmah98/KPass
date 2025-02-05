@@ -26,28 +26,35 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
 
 
 
-    fun openAddOrEditPasswordDialog(currentItem: PasswordMap ?= null){
+    fun openAddOrEditPasswordDialog(currentItem: PasswordMap ?= null, isEditing: Boolean = false){
         viewModelScope.launch {
-            _dialogController.emit(DialogModel.AddDialog(true))
-            _dialogController.emit(DialogModel.DetailsDialog(false))
-            _dialogController.emit(DialogModel.ConfirmationDialog(false))
-        }
-        if(currentItem != null)
             _currentItem.value = currentItem
+            if(isEditing){
+                _dialogController.emit(DialogModel.EditDialog(true))
+            }
+            else{
+                _dialogController.emit(DialogModel.AddDialog(true))
+            }
+        }
     }
 
-    fun closeAddOrEditPasswordDialog(){
+    fun closeAddOrEditPasswordDialog(isEditing: Boolean = false){
         viewModelScope.launch {
-            _dialogController.emit(DialogModel.AddDialog(false))
+            if(isEditing){
+                _dialogController.emit(DialogModel.EditDialog(false))
+            }
+            else {
+                _dialogController.emit(DialogModel.AddDialog(false))
+            }
         }
         _currentItem.value = null
     }
 
     fun openConfirmationDialog(data: PasswordMap){
+        _currentItem.value = data
         viewModelScope.launch {
             _dialogController.emit(DialogModel.ConfirmationDialog(true))
         }
-        _currentItem.value = data
     }
 
     fun closeConfirmationDialog(){
@@ -58,10 +65,10 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     }
 
     fun openPasswordDetailDialog(data: PasswordMap){
+        _currentItem.value = data
         viewModelScope.launch {
             _dialogController.emit(DialogModel.DetailsDialog(true))
         }
-        _currentItem.value = data
     }
 
     fun closePasswordDetailDialog(){

@@ -5,6 +5,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
+import com.apps.kunalfarmah.kpass.BuildConfig
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -20,7 +21,7 @@ object CryptoManager {
     private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC
     private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
     private const val TRANSFORMATION = "$AES_ALGORITHM/$BLOCK_MODE/$PADDING"
-    private const val KEY_MASTER = "KPass_AES_KEY"
+    private const val KEY_MASTER = BuildConfig.KEY_MASTER
 
     private val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
         load(null) // With load function we initialize our keystore
