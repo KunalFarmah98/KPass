@@ -79,9 +79,9 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     }
 
 
-    fun insertOrUpdatePassword(websiteName: String, websiteUrl: String?, username: String, password: String){
+    fun insertOrUpdatePassword(id: String = "", websiteName: String, websiteUrl: String?, username: String, password: String, isUpdate: Boolean = false){
         viewModelScope.launch(Dispatchers.IO) {
-            passwordRepository.insertOrUpdatePassword(websiteName, websiteUrl, username, password)
+            passwordRepository.insertOrUpdatePassword(id, websiteName, websiteUrl, username, password, isUpdate)
             _passwords.value = DataModel.Success(passwordRepository.getAllPasswords())
         }
     }
@@ -92,9 +92,9 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
         }
     }
 
-    fun deletePassword(username: String){
+    fun deletePassword(id: String){
         viewModelScope.launch(Dispatchers.IO) {
-            passwordRepository.deletePassword(username)
+            passwordRepository.deletePassword(id)
             _passwords.value = DataModel.Success(passwordRepository.getAllPasswords())
         }
     }

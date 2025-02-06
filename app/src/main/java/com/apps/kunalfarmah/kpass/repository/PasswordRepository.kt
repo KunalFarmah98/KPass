@@ -6,17 +6,30 @@ import com.apps.kunalfarmah.kpass.security.CryptoManager
 
 class PasswordRepository(private val passwordMapDao: PasswordMapDao){
 
-    suspend fun insertOrUpdatePassword(websiteName: String, websiteUrl: String?, username: String, password: String){
+    suspend fun insertOrUpdatePassword(id: String = "", websiteName: String, websiteUrl: String?, username: String, password: String, isUpdate: Boolean = false){
         val encryptedPassword = CryptoManager.encrypt(password)
-        passwordMapDao.insertPassword(PasswordMap(websiteName, websiteUrl, username, encryptedPassword))
+        val passwordMap = PasswordMap(
+            id = id,
+            websiteName = websiteName,
+            websiteUrl = websiteUrl,
+            username = username,
+            password = encryptedPassword,
+            lastModified = System.currentTimeMillis()
+        )
+        if(isUpdate){
+            passwordMapDao.updatePassword(passwordMap)
+        }
+        else{
+            passwordMapDao.insertPassword(passwordMap)
+        }
     }
 
     suspend fun getAllPasswords(): List<PasswordMap>{
         return passwordMapDao.getAllPasswords()
     }
 
-    suspend fun deletePassword(username: String){
-        passwordMapDao.deletePassword(username)
+    suspend fun deletePassword(id: String){
+        passwordMapDao.deletePassword(id)
     }
 
 }

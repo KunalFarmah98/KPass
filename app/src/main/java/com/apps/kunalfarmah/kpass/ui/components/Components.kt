@@ -82,7 +82,7 @@ fun PasswordsList(
         LazyColumn(
             modifier = Modifier.padding(20.dp)
         ) {
-            items(items = passwords, key = { it.websiteName + it.username }) {
+            items(items = passwords, key = { it.id }) {
                 PasswordItem(it, onItemClick, onEditClick, onDeleteClick)
             }
         }
@@ -226,6 +226,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
     val name = if(editing) currentItem?.websiteName?:"" else ""
     val url = if(editing) currentItem?.websiteUrl?:"" else ""
     val username = if(editing) currentItem?.username?:"" else ""
+    val id = if(editing) currentItem?.id ?: "" else ""
     var pass = ""
     if (editing) {
         currentItem?.let {
@@ -341,6 +342,9 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                         onClick = {
                             onAddNewPassword(
                                 PasswordMap(
+                                    id = id.let{
+                                        it.ifEmpty { "${System.currentTimeMillis()}_${websiteNameState}_${usernameState}" }
+                                    },
                                     websiteName = websiteNameState,
                                     websiteUrl = websiteUrlState,
                                     username = usernameState,
@@ -493,15 +497,14 @@ fun TextField(label: String = "", placeholder: String = "", value: String = "", 
 @Preview
 @Composable
 fun PasswordItemPreview() {
-    PasswordItem(PasswordMap("test", "test", "test", "test"))
+    PasswordItem(PasswordMap(websiteName = "test", websiteUrl = "test", username = "test", password = "test"))
 }
 
 
 @Preview(showBackground = true)
 @Composable
 fun PasswordsListPreview() {
-    PasswordsList(listOf(PasswordMap("test1", "test1", "test", "test"),
-        PasswordMap("test2", "test2", "test", "test"),
-        PasswordMap("test3", "test3", "test", "test")
-    ))
+    PasswordsList(listOf(PasswordMap(websiteUrl = "test1", websiteName =  "test1", username = "test", password = "test"),
+        PasswordMap(websiteUrl = "test2", websiteName =  "test2", username = "test", password = "test"),
+        PasswordMap(websiteUrl = "test3", websiteName =  "test3", username = "test", password = "test")    ))
 }

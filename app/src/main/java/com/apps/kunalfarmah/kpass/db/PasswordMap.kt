@@ -5,9 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class PasswordMap(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = false)
+    val id: String = "",
     val websiteName: String = "",
     val websiteUrl: String?="",
     val username: String = "",
-    val password: String = ""
+    val password: String = "",
+    val lastModified: Long = System.currentTimeMillis()
 )

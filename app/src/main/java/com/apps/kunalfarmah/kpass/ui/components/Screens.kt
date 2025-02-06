@@ -173,10 +173,12 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
             currentItem = null,
             onAddNewPassword = { data: PasswordMap ->
                 viewModel.insertOrUpdatePassword(
+                    id = data.id,
                     websiteUrl = data.websiteUrl,
                     websiteName = data.websiteName,
                     username = data.username,
-                    password = data.password
+                    password = data.password,
+                    isUpdate = false
                 )
                 viewModel.closeAddOrEditPasswordDialog()
             },
@@ -192,10 +194,12 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
             currentItem = currentItem,
             onAddNewPassword = { data: PasswordMap ->
                 viewModel.insertOrUpdatePassword(
+                    id = data.id,
                     websiteUrl = data.websiteUrl,
                     websiteName = data.websiteName,
                     username = data.username,
-                    password = data.password
+                    password = data.password,
+                    isUpdate = true
                 )
                 viewModel.closeAddOrEditPasswordDialog(true)
             },
@@ -211,7 +215,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
             body = "Are you sure you want to delete this password?\nIt can not be recovered again",
             onPositiveClick = {
                 if (currentItem != null) {
-                    viewModel.deletePassword(currentItem!!.username)
+                    viewModel.deletePassword(currentItem!!.id)
                     viewModel.closeConfirmationDialog()
                 }
             },
