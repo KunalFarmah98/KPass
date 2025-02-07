@@ -22,13 +22,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,9 +53,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -199,6 +204,61 @@ fun ConfirmationDialog(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun SearchPassword(
+    onSearch: (query: String) -> Unit = {}) {
+    var searchOpen by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var query by rememberSaveable {
+        mutableStateOf("")
+    }
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp, start = 20.dp, end = 20.dp),
+        label = {Text("Search for passwords")},
+        placeholder = {Text("Search by username or website")},
+        value = query,
+        onValueChange = {
+            searchOpen = true
+            query = it
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = {
+            onSearch(query)
+            focusManager.clearFocus()
+        }),
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedTextColor = Color.Black,
+            focusedTextColor = Color.Black,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = Color.Gray,
+            unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+            focusedPlaceholderColor = Color.Gray,
+            unfocusedPlaceholderColor = Color.Gray,
+            cursorColor = Color.Black,
+            errorTextColor = Color.Red,
+            errorLabelColor = Color.Red,
+            errorBorderColor = Color.Red
+        ),
+        trailingIcon = {
+           IconButton(onClick = {
+               searchOpen = false
+               query = ""
+               onSearch("")
+               focusManager.clearFocus()
+           }) {
+               Icon(imageVector = if(searchOpen) Icons.Filled.Close else Icons.Outlined.Search, "search or cancel")
+           }
+        }
+    )
 }
 
 @Composable
@@ -456,18 +516,18 @@ fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {})
 
 @Preview
 @Composable
-fun TextField(label: String = "", placeholder: String = "", value: String = "", onValueChange: (String) -> Unit = {}, keyboardType: KeyboardType = KeyboardType.Text
-,readOnly: Boolean = false, trailingIcon: ImageVector? = null, onTrailingIconClick: () -> Unit = {}
+fun TextField(modifier: Modifier = Modifier, label: String = "", placeholder: String = "", value: String = "", onValueChange: (String) -> Unit = {}, keyboardType: KeyboardType = KeyboardType.Text
+,readOnly: Boolean = false, trailingIcon: ImageVector? = null, onTrailingIconClick: () -> Unit = {}, imeAction: ImeAction = ImeAction.Done,
 ){
     OutlinedTextField(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(10.dp),
         label = {Text(label)},
         placeholder = {Text(placeholder)},
         value = value,
         onValueChange = onValueChange,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedTextColor = Color.Black,

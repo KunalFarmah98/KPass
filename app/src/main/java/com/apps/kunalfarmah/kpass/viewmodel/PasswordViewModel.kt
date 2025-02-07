@@ -99,4 +99,21 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
         }
     }
 
+    fun search(query: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            if(query.isEmpty()){
+                _passwords.value = DataModel.Success(passwordRepository.getAllPasswords())
+            }
+            else {
+                val list = ((passwords.value) as DataModel.Success).data.filter {
+                    it.websiteName.contains(query, ignoreCase = true) ||
+                            it.websiteUrl?.contains(query, ignoreCase = true) == true ||
+                            it.username.contains(query, ignoreCase = true)
+                }
+                _passwords.value = DataModel.Success(list)
+            }
+        }
+
+    }
+
 }

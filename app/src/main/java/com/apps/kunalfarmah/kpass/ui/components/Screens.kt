@@ -149,6 +149,9 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
+                SearchPassword(onSearch = {query ->
+                    viewModel.search(query)
+                })
                 PasswordsList(
                     passwords = (passwords as DataModel.Success).data,
                     onEditClick = { data: PasswordMap ->
