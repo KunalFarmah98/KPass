@@ -2,6 +2,7 @@ package com.apps.kunalfarmah.kpass.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.apps.kunalfarmah.kpass.security.CryptoManager
 
 @Entity
 data class PasswordMap(
@@ -12,4 +13,13 @@ data class PasswordMap(
     val username: String = "",
     val password: String = "",
     val lastModified: Long = System.currentTimeMillis()
-)
+){
+    override fun toString(): String {
+        return "Website: $websiteName ($websiteUrl) | Username: $username | Password: $password"
+    }
+
+    fun toDecryptedString(): String{
+        return "Website: $websiteName ($websiteUrl) | Username: $username | Password: ${CryptoManager.decrypt(password)}"
+
+    }
+}
