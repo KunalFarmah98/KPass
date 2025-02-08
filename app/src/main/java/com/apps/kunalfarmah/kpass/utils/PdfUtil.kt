@@ -8,6 +8,7 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
+import com.apps.kunalfarmah.kpass.MainActivity
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.itextpdf.io.image.ImageDataFactory
@@ -43,10 +44,18 @@ object PdfUtil {
             contentResolver.openOutputStream(fileUri)?.use { outputStream ->
                 createPdfWithPassword(context, outputStream, data, password)
             }
-            Toast.makeText(context, context.getString(R.string.passwords_exported_successfully), Toast.LENGTH_SHORT).show()
+            (context as MainActivity).runOnUiThread {
+                Toast.makeText(context, context.getString(R.string.passwords_exported_successfully), Toast.LENGTH_SHORT).show()
+            }
             Log.d("exportListToPdfWithPassword", "PDF created successfully at $fileUri")
         } catch (e: IOException) {
-            Toast.makeText(context, context.getString(R.string.something_went_wrong_exporting_the_passwords_please_try_again), Toast.LENGTH_SHORT).show()
+            (context as MainActivity).runOnUiThread {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.something_went_wrong_exporting_the_passwords_please_try_again),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             Log.e("exportListToPdfWithPassword", "Error creating PDF: " + e.message)
         } catch (e: SecurityException) {
             Log.e("exportListToPdfWithPassword", "Security error creating PDF: " + e.message)

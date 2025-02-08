@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.itext.pdf)
     implementation(libs.itext.bouncycastle.adapter)
+    implementation(libs.datastore.preferences)
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.lifecycle.runtime.compose)

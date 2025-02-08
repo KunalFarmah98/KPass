@@ -14,6 +14,7 @@ room = "2.6.1"
 ksp = "2.0.0-1.0.24"
 koin = "4.0.2"
 itext = "8.0.2"
+datastore = "1.1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,7 @@ koin-android = {module = "io.insert-koin:koin-android", version.ref = "koin"}
 lifecycle-runtime-compose = {module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx"}
 itext-pdf = {module = "com.itextpdf:itext7-core", version.ref = "itext"}
 itext-bouncycastle-adapter = {module = "com.itextpdf:bouncy-castle-adapter", version.ref = "itext"}
+datastore-preferences = {module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

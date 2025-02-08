@@ -2,10 +2,12 @@ package com.apps.kunalfarmah.kpass.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.model.DialogModel
 import com.apps.kunalfarmah.kpass.repository.PasswordRepository
+import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -113,7 +115,22 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
                 _passwords.value = DataModel.Success(list)
             }
         }
+    }
 
+    fun savePassword(password: String, callBack: () -> Unit = {}){
+        viewModelScope.launch(Dispatchers.IO) {
+            PreferencesManager.setData(Constants.MASTER_PASSWORD, password)
+        }.invokeOnCompletion {
+            callBack()
+        }
+    }
+
+    fun getMasterPassword(callBack: (String) -> Unit = {}){
+        viewModelScope.launch(Dispatchers.IO) {
+            PreferencesManager.getData(Constants.MASTER_PASSWORD).collect{ password ->
+                callBack(password)
+            }
+        }
     }
 
 }

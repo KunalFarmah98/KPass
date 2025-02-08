@@ -94,6 +94,53 @@ fun PasswordsList(
     }
 }
 
+@Preview
+@Composable
+fun EnterPassword(onConfirm: (String) -> Unit = {}){
+    var password by rememberSaveable {
+        mutableStateOf("")
+    }
+    Column(Modifier
+        .fillMaxSize()
+        .background(Color.Transparent), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+            elevation = CardDefaults.elevatedCardElevation(2.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    "Please provide a password to lock the exported data",
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(Modifier.height(20.dp))
+                TextField(
+                    label = "Password",
+                    placeholder = "Please enter your password",
+                    onValueChange = { password = it },
+                    value = password,
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                )
+                Spacer(Modifier.height(20.dp))
+                Button(
+                    onClick = { onConfirm(password) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Confirm")
+                }
+            }
+        }
+    }
+
+}
 
 @Composable
 fun PasswordItem(

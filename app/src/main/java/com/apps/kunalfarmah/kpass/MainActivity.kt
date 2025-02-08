@@ -37,9 +37,11 @@ import androidx.compose.ui.graphics.Color
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.ui.components.AddPassword
+import com.apps.kunalfarmah.kpass.ui.components.EnterPassword
 import com.apps.kunalfarmah.kpass.ui.components.HomeScreen
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
+import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -68,18 +70,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createFile() {
-        Toast.makeText(this, "Please select where to export the data", Toast.LENGTH_SHORT).show()
+        runOnUiThread {
+            Toast.makeText(this, "Please select where to export the data", Toast.LENGTH_SHORT)
+                .show()
+        }
         createFileLauncher.launch("K_Pass_Backup.pdf")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PreferencesManager.context  = this
         createFileLauncher = registerForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri: Uri? ->
             uri?.let {
-                PdfUtil.exportPasswordsToPdf(this, (mainViewModel.passwords.value as DataModel.Success).data, uri, "")
+                mainViewModel.getMasterPassword{ password ->
+                    PdfUtil.exportPasswordsToPdf(this@MainActivity, (mainViewModel.passwords.value as DataModel.Success).data, uri, password)
+                }
             }
         }
         enableEdgeToEdge()
@@ -87,6 +95,9 @@ class MainActivity : AppCompatActivity() {
             KPassTheme {
                 var fabEnabled by rememberSaveable {
                     mutableStateOf(true)
+                }
+                var enterPassword by rememberSaveable {
+                    mutableStateOf(false)
                 }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -98,7 +109,16 @@ class MainActivity : AppCompatActivity() {
                                 }
                             },
                             actions = {
-                                IconButton(onClick = { export() }) {
+                                IconButton(onClick = {
+                                    mainViewModel.getMasterPassword { password ->
+                                        if(password.isEmpty()){
+                                            enterPassword = true
+                                        }
+                                        else {
+                                            export()
+                                        }
+                                    }
+                                }) {
                                     Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Export")
                                 }
                             },
@@ -118,11 +138,11 @@ class MainActivity : AppCompatActivity() {
                     val enrollLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.StartActivityForResult(),
                         onResult = {
-                            //authenticate()
+                            authenticate()
                         }
                     )
                     LaunchedEffect(true) {
-                        //authenticate()
+                        authenticate()
                     }
                     LaunchedEffect(biometricResult) {
                         if (biometricResult is BiometricPromptManager.BiometricResult.AuthenticationNotSet) {
@@ -138,54 +158,58 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    HomeScreen(Modifier.padding(innerPadding), mainViewModel) { state ->
-                        fabEnabled = state
-                    }
+                    biometricResult?.let { result ->
+                        when (result) {
+                            is BiometricPromptManager.BiometricResult.AuthenticationError -> {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Authentication failed due to ${result.error}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
 
-//                    biometricResult?.let { result ->
-//                        when (result) {
-//                            is BiometricPromptManager.BiometricResult.AuthenticationError -> {
-//                                Toast.makeText(
-//                                    applicationContext,
-//                                    "Authentication failed due to ${result.error}",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
-//                            }
-//
-//                            BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
-//                                Toast.makeText(
-//                                    applicationContext,
-//                                    "Authentication failed, please try again",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
-//                            }
-//
-//                            BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
-//                                HomeScreen(Modifier.padding(innerPadding), mainViewModel)
-//                            }
-//
-//                            BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
-//                                Toast.makeText(
-//                                    applicationContext,
-//                                    "Biometric Feature unavailable",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
-//                                finish()
-//                            }
-//
-//                            BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
-//                                Toast.makeText(
-//                                    applicationContext,
-//                                    "Biometric Hardware unavailable",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
-//                                finish()
-//                            }
-//
-//                            else -> {}
-//
-//                        }
-//                    }
+                            BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Authentication failed, please try again",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
+                                if(enterPassword){
+                                    EnterPassword { password ->
+                                        mainViewModel.savePassword(password){
+                                            enterPassword = false
+                                            export()
+                                        }
+                                    }
+                                }
+                                HomeScreen(Modifier.padding(innerPadding), mainViewModel)
+                            }
+
+                            BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Biometric Feature unavailable",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                finish()
+                            }
+
+                            BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Biometric Hardware unavailable",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                finish()
+                            }
+
+                            else -> {}
+
+                        }
+                    }
                 }
             }
         }
