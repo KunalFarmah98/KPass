@@ -59,6 +59,8 @@ dependencies {
     implementation(libs.biometric)
     implementation(libs.androidx.appcompat)
     implementation(libs.koin.android)
+    implementation(libs.itext.pdf)
+    implementation(libs.itext.bouncycastle.adapter)
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.lifecycle.runtime.compose)

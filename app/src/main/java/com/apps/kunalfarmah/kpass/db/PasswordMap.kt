@@ -19,7 +19,7 @@ data class PasswordMap(
     }
 
     fun toDecryptedString(): String{
-        return "Website: $websiteName ($websiteUrl) | Username: $username | Password: ${CryptoManager.decrypt(password)}"
+        return "$websiteName ($websiteUrl)\nusername: $username\nPassword: ${CryptoManager.decrypt(password)}"
 
     }
 }

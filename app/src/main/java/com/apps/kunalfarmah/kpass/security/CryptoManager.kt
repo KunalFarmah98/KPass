@@ -1,6 +1,4 @@
 package com.apps.kunalfarmah.kpass.security
-import android.annotation.SuppressLint
-import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -12,10 +10,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 
-@SuppressLint("StaticFieldLeak")
 object CryptoManager {
 
-    lateinit var context: Context
     private const val ANDROID_KEY_STORE = "AndroidKeyStore"
     private const val AES_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
     private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC
