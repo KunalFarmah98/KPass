@@ -74,7 +74,6 @@ import androidx.core.content.ContextCompat
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.CryptoManager
-import org.bouncycastle.math.raw.Mod
 
 fun Context.copyToClipboard(label: String, text: CharSequence) {
     val clipboardManager = ContextCompat.getSystemService(this, ClipboardManager::class.java)
