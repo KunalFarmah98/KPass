@@ -44,6 +44,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -56,6 +59,7 @@ import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -197,7 +201,12 @@ class MainActivity : AppCompatActivity() {
                     floatingActionButton = { AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
-                    val biometricResult by promptManager.promptResults.collectAsState(if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) null else BiometricPromptManager.BiometricResult.AuthenticationSuccess)
+                    val biometricResult by promptManager.promptResults.collectAsState(
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                            null
+                        else
+                            BiometricPromptManager.BiometricResult.AuthenticationSuccess
+                    )
                     val enrollLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.StartActivityForResult(),
                         onResult = {
@@ -206,7 +215,11 @@ class MainActivity : AppCompatActivity() {
                     )
                     LaunchedEffect(true) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            authenticate()
+                            lifecycleScope.launch {
+                                repeatOnLifecycle(Lifecycle.State.STARTED){
+                                    authenticate()
+                                }
+                            }
                         }
                     }
                     LaunchedEffect(biometricResult) {
