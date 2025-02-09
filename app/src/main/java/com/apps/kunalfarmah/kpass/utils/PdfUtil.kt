@@ -8,7 +8,7 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
-import com.apps.kunalfarmah.kpass.MainActivity
+import com.apps.kunalfarmah.kpass.ui.activity.MainActivity
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.itextpdf.io.image.ImageDataFactory

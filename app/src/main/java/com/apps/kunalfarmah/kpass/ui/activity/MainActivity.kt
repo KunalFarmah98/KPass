@@ -1,4 +1,4 @@
-package com.apps.kunalfarmah.kpass
+package com.apps.kunalfarmah.kpass.ui.activity
 
 import android.content.Intent
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -48,6 +48,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
