@@ -61,6 +61,7 @@ import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -203,12 +204,14 @@ class MainActivity : AppCompatActivity() {
                     floatingActionButton = { AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
-                    val biometricResult by promptManager.promptResults.collectAsState(
-                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    var biometricResult by remember {
+                        mutableStateOf<BiometricPromptManager.BiometricResult?>(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
                             null
                         else
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess
-                    )
+                        )
+                    }
                     val enrollLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.StartActivityForResult(),
                         onResult = {
@@ -226,6 +229,9 @@ class MainActivity : AppCompatActivity() {
                         mainViewModel.getMasterPassword {
                             CryptoManager.password = it
                         }
+                        promptManager.promptResults.collectLatest {
+                            biometricResult = it
+                        }
                     }
                     LaunchedEffect(biometricResult) {
                         if (biometricResult is BiometricPromptManager.BiometricResult.AuthenticationNotSet) {
@@ -236,6 +242,8 @@ class MainActivity : AppCompatActivity() {
                                         BIOMETRIC_STRONG or DEVICE_CREDENTIAL
                                     )
                                 }
+                                Toast.makeText(this@MainActivity,
+                                    getString(R.string.please_set_up_your_screen_lock_to_use_this_app), Toast.LENGTH_SHORT).show()
                                 enrollLauncher.launch(enrollIntent)
                             }
                         }
@@ -246,17 +254,22 @@ class MainActivity : AppCompatActivity() {
                             is BiometricPromptManager.BiometricResult.AuthenticationError -> {
                                 Toast.makeText(
                                     applicationContext,
-                                    "Authentication failed due to ${result.error}",
+                                    stringResource(
+                                        R.string.authentication_failed_due_to,
+                                        result.error
+                                    ),
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                finish()
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationFailed -> {
                                 Toast.makeText(
                                     applicationContext,
-                                    "Authentication failed, please try again",
+                                    stringResource(R.string.authentication_failed_please_try_again),
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                finish()
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
@@ -289,8 +302,8 @@ class MainActivity : AppCompatActivity() {
                                 }
                                 if(deleteAllPasswords){
                                     ConfirmationDialog(
-                                        title = "Delete All Passwords",
-                                        body = "Are you sure you want to delete all passwords?\nThey can not be recovered again.",
+                                        title = stringResource(R.string.delete_all_passwords),
+                                        body = stringResource(R.string.are_you_sure_you_want_to_delete_all_passwords_they_can_not_be_recovered_again),
                                         onNegativeClick = {
                                             deleteAllPasswords = false
 
@@ -306,7 +319,7 @@ class MainActivity : AppCompatActivity() {
                             BiometricPromptManager.BiometricResult.FeatureUnavailable -> {
                                 Toast.makeText(
                                     applicationContext,
-                                    "Biometric Feature unavailable",
+                                    stringResource(R.string.biometric_feature_unavailable),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 finish()
@@ -315,7 +328,7 @@ class MainActivity : AppCompatActivity() {
                             BiometricPromptManager.BiometricResult.HardwareUnavailable -> {
                                 Toast.makeText(
                                     applicationContext,
-                                    "Biometric Hardware unavailable",
+                                    stringResource(R.string.biometric_hardware_unavailable),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 finish()

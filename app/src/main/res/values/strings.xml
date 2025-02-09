@@ -11,4 +11,11 @@
     <string name="password_changed_successfully">Password changed successfully</string>
     <string name="delete_all">Delete All</string>
     <string name="change_export_password">Change export password</string>
+    <string name="please_set_up_your_screen_lock_to_use_this_app">Please set up your screen lock to use this app</string>
+    <string name="authentication_failed_please_try_again">Authentication failed, please try again</string>
+    <string name="are_you_sure_you_want_to_delete_all_passwords_they_can_not_be_recovered_again">Are you sure you want to delete all passwords?\nThey can not be recovered again.</string>
+    <string name="delete_all_passwords">Delete All Passwords</string>
+    <string name="biometric_feature_unavailable">Biometric Feature unavailable</string>
+    <string name="biometric_hardware_unavailable">Biometric Hardware unavailable</string>
+    <string name="authentication_failed_due_to">Authentication failed due to %1$s</string>
 </resources>
