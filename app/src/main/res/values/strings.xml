@@ -18,4 +18,7 @@
     <string name="biometric_feature_unavailable">Biometric Feature unavailable</string>
     <string name="biometric_hardware_unavailable">Biometric Hardware unavailable</string>
     <string name="authentication_failed_due_to">Authentication failed due to %1$s</string>
+    <string name="unlock_app">Unlock App</string>
+    <string name="please_use_your_fingerprint_or_screen_lock_to_unlock_the_app">Please use your fingerprint or screen lock to unlock the app</string>
+    <string name="please_select_the_location_for_the_export">Please select the location for the export</string>
 </resources>

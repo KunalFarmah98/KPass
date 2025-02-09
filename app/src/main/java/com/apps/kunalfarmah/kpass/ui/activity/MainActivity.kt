@@ -79,8 +79,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun authenticate() {
         promptManager.showBiometricPrompt(
-            title = "Unlock App",
-            description = "Please use your fingerprint or screen lock to unlock the app"
+            title = getString(R.string.unlock_app),
+            description = getString(R.string.please_use_your_fingerprint_or_screen_lock_to_unlock_the_app)
         )
 
     }
@@ -91,7 +91,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun createFile() {
         runOnUiThread {
-            Toast.makeText(this, "Please select where to export the data", Toast.LENGTH_SHORT)
+            Toast.makeText(this,
+                getString(R.string.please_select_the_location_for_the_export), Toast.LENGTH_SHORT)
                 .show()
         }
         createFileLauncher.launch("K_Pass_Backup.pdf")
