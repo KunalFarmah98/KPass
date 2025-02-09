@@ -85,7 +85,7 @@ fun Context.copyToClipboard(label: String, text: CharSequence) {
 
 @Preview
 @Composable
-fun OptionsMenu(titles: List<String> = listOf(), onClickListener: (index: Int) -> Unit = {}){
+fun OptionsMenu(titles: List<String> = listOf(), onClickListener: (title: String) -> Unit = {}){
     var expanded by rememberSaveable { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = !expanded }) {
@@ -95,12 +95,12 @@ fun OptionsMenu(titles: List<String> = listOf(), onClickListener: (index: Int) -
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            titles.forEachIndexed { index, s ->
+            titles.forEach { title ->
                 DropdownMenuItem(
-                    text = { Text(s) },
+                    text = { Text(title) },
                     onClick = {
                         expanded = false
-                        onClickListener(index)
+                        onClickListener(title)
                     }
                 )
             }

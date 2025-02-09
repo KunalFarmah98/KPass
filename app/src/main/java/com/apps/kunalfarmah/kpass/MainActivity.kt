@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
@@ -173,15 +174,15 @@ class MainActivity : AppCompatActivity() {
                                     }
                                     OptionsMenu(
                                         titles = listOf(
-                                            "Delete All",
-                                            "Change export password"
+                                            stringResource(R.string.delete_all),
+                                            stringResource(R.string.change_export_password)
                                         )
                                     ) {
                                         when (it) {
-                                            0 -> {
+                                            getString(R.string.delete_all) -> {
                                                 deleteAllPasswords = true
                                             }
-                                            1 -> {
+                                            getString(R.string.change_export_password) -> {
                                                 changePassword = true
                                                 enterPassword = false
                                             }
@@ -220,6 +221,9 @@ class MainActivity : AppCompatActivity() {
                                     authenticate()
                                 }
                             }
+                        }
+                        mainViewModel.getMasterPassword {
+                            CryptoManager.password = it
                         }
                     }
                     LaunchedEffect(biometricResult) {

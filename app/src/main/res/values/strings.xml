@@ -9,4 +9,6 @@
     <string name="something_went_wrong_exporting_the_passwords_please_try_again">Something went wrong exporting the passwords. Please try again.</string>
     <string name="password_can_not_be_empty">Password can not be empty</string>
     <string name="password_changed_successfully">Password changed successfully</string>
+    <string name="delete_all">Delete All</string>
+    <string name="change_export_password">Change export password</string>
 </resources>
