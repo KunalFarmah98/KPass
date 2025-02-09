@@ -151,7 +151,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
             ) {
                 SearchPassword(onSearch = {query ->
                     viewModel.search(query)
-                })
+                }, enabled = !isDialogOpen)
                 PasswordsList(
                     passwords = (passwords as DataModel.Success).data,
                     onEditClick = { data: PasswordMap ->
@@ -172,6 +172,11 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
     }
 
     if (openAddPasswordDialog) {
+        // close all open dialogs before opening add password
+        viewModel.closeConfirmationDialog()
+        viewModel.closePasswordDetailDialog()
+        viewModel.closePasswordDetailDialog()
+        viewModel.closeAddOrEditPasswordDialog(true)
         AddOrEditPasswordDialog(
             currentItem = null,
             onAddNewPassword = { data: PasswordMap ->
@@ -190,7 +195,6 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
             },
             editing = false
         )
-
     }
     else if(openEditPasswordDialog){
         AddOrEditPasswordDialog(

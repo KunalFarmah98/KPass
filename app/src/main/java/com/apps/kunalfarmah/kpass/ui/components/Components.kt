@@ -299,6 +299,7 @@ fun ConfirmationDialog(
 @Preview
 @Composable
 fun SearchPassword(
+    enabled: Boolean = true,
     onSearch: (query: String) -> Unit = {}) {
     var searchOpen by rememberSaveable {
         mutableStateOf(false)
@@ -347,7 +348,8 @@ fun SearchPassword(
            }) {
                Icon(imageVector = if(searchOpen) Icons.Filled.Close else Icons.Outlined.Search, "search or cancel")
            }
-        }
+        },
+        enabled = enabled
     )
 }
 
