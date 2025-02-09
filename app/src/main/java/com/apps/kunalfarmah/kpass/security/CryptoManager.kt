@@ -18,6 +18,7 @@ object CryptoManager {
     private const val PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7
     private const val TRANSFORMATION = "$AES_ALGORITHM/$BLOCK_MODE/$PADDING"
     private const val KEY_MASTER = BuildConfig.KEY_MASTER
+    lateinit var password: String
 
     private val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE).apply {
         load(null) // With load function we initialize our keystore

@@ -49,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
+import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.ui.components.AddPassword
 import com.apps.kunalfarmah.kpass.ui.components.ConfirmationDialog
 import com.apps.kunalfarmah.kpass.ui.components.EnterPassword
@@ -100,9 +101,12 @@ class MainActivity : AppCompatActivity() {
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri: Uri? ->
             uri?.let {
-                mainViewModel.getMasterPassword{ password ->
-                    PdfUtil.exportPasswordsToPdf(this@MainActivity, (mainViewModel.passwords.value as DataModel.Success).data, uri, password)
-                }
+                PdfUtil.exportPasswordsToPdf(
+                    this@MainActivity,
+                    (mainViewModel.passwords.value as DataModel.Success).data,
+                    uri,
+                    CryptoManager.password
+                )
             }
         }
         enableEdgeToEdge()
@@ -140,9 +144,23 @@ class MainActivity : AppCompatActivity() {
                                         mainViewModel.getMasterPassword { password ->
                                             if(password.isEmpty()){
                                                 enterPassword = true
+                                                changePassword = false
                                             }
                                             else {
-                                                export()
+                                                if(!enterPassword && !changePassword) {
+                                                    export()
+                                                }
+                                                if(changePassword){
+                                                    runOnUiThread {
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            getString(R.string.password_changed_successfully),
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                }
+                                                enterPassword = false
+                                                changePassword = false
                                             }
                                         }
                                     }) {
@@ -164,7 +182,10 @@ class MainActivity : AppCompatActivity() {
                                             0 -> {
                                                 deleteAllPasswords = true
                                             }
-                                            1 -> changePassword = true
+                                            1 -> {
+                                                changePassword = true
+                                                enterPassword = false
+                                            }
                                         }
                                     }
                                 }
@@ -242,12 +263,12 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             return@EnterPassword
                                         }
-                                        mainViewModel.savePassword(password){
-                                            if(enterPassword) {
+                                        CryptoManager.password = password
+                                        mainViewModel.savePassword(password)
+                                        {
+                                            if(enterPassword){
                                                 export()
                                             }
-                                            changePassword = false
-                                            enterPassword = false
                                         }
                                     }
                                 }
