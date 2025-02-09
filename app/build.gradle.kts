@@ -4,9 +4,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.ksp)
 }
 
-val masterPass: String = gradleLocalProperties(rootDir, providers).getProperty("masterPass")
+val keyMaster: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_MASTER")
+
+
 android {
     namespace = "com.apps.kunalfarmah.kpass"
     compileSdk = 35
@@ -18,7 +21,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String","masterPass", masterPass)
+        buildConfigField("String","KEY_MASTER", keyMaster)
     }
 
     buildTypes {
@@ -39,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -54,7 +58,15 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.biometric)
     implementation(libs.androidx.appcompat)
-    implementation(libs.datastore)
+    implementation(libs.koin.android)
+    implementation(libs.itext.pdf)
+    implementation(libs.itext.bouncycastle.adapter)
+    implementation(libs.datastore.preferences)
+    implementation(libs.splashscreen)
+    implementation(libs.room)
+    implementation(libs.room.ktx)
+    implementation(libs.lifecycle.runtime.compose)
+    ksp(libs.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">KPass</string>
+    <string name="you_haven_t_stored_any_passwords_yet">You haven\'t stored any passwords yet</string>
+    <string name="start_by_clicking_the_icon">Start by clicking the + icon</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="passwords_exported_successfully">Passwords exported successfully.</string>
+    <string name="something_went_wrong_exporting_the_passwords_please_try_again">Something went wrong exporting the passwords. Please try again.</string>
+    <string name="password_can_not_be_empty">Password can not be empty</string>
+    <string name="password_changed_successfully">Password changed successfully</string>
 </resources>

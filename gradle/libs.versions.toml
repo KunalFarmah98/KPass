@@ -10,7 +10,12 @@ activityCompose = "1.9.3"
 composeBom = "2024.04.01"
 biometric = "1.4.0-alpha02"
 appcompat = "1.7.0"
+room = "2.6.1"
+ksp = "2.0.0-1.0.24"
+koin = "4.0.2"
+itext = "8.0.2"
 datastore = "1.1.2"
+splash = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,10 +34,18 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 biometric = {module = "androidx.biometric:biometric", version.ref = "biometric"}
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-datastore = {module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
+room = {module = "androidx.room:room-runtime", version.ref = "room"}
+room-ktx = {module = "androidx.room:room-ktx", version.ref = "room"}
+room-compiler = {module = "androidx.room:room-compiler", version.ref = "room"}
+koin-android = {module = "io.insert-koin:koin-android", version.ref = "koin"}
+lifecycle-runtime-compose = {module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx"}
+itext-pdf = {module = "com.itextpdf:itext7-core", version.ref = "itext"}
+itext-bouncycastle-adapter = {module = "com.itextpdf:bouncy-castle-adapter", version.ref = "itext"}
+datastore-preferences = {module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
+splashscreen = {module = "androidx.core:core-splashscreen", version.ref = "splash"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
