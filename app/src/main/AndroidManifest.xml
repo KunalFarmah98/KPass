@@ -11,12 +11,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.KPass"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.KPass">
+            android:theme="@style/Theme.KPass.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

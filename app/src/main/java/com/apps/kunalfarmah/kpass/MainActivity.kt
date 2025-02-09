@@ -15,16 +15,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -95,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         PreferencesManager.context  = this
         createFileLauncher = registerForActivityResult(
@@ -199,7 +197,7 @@ class MainActivity : AppCompatActivity() {
                     floatingActionButton = { AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
-                    val biometricResult by promptManager.promptResults.collectAsState(null)
+                    val biometricResult by promptManager.promptResults.collectAsState(if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) null else BiometricPromptManager.BiometricResult.AuthenticationSuccess)
                     val enrollLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.StartActivityForResult(),
                         onResult = {
@@ -207,11 +205,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     )
                     LaunchedEffect(true) {
-                        authenticate()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            authenticate()
+                        }
                     }
                     LaunchedEffect(biometricResult) {
                         if (biometricResult is BiometricPromptManager.BiometricResult.AuthenticationNotSet) {
-                            if (Build.VERSION.SDK_INT >= 30) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                                 val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
                                     putExtra(
                                         Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,

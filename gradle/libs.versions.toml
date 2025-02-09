@@ -15,6 +15,7 @@ ksp = "2.0.0-1.0.24"
 koin = "4.0.2"
 itext = "8.0.2"
 datastore = "1.1.2"
+splash = "1.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +42,7 @@ lifecycle-runtime-compose = {module = "androidx.lifecycle:lifecycle-runtime-comp
 itext-pdf = {module = "com.itextpdf:itext7-core", version.ref = "itext"}
 itext-bouncycastle-adapter = {module = "com.itextpdf:bouncy-castle-adapter", version.ref = "itext"}
 datastore-preferences = {module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
+splashscreen = {module = "androidx.core:core-splashscreen", version.ref = "splash"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
