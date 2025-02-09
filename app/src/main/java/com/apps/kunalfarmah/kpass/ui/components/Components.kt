@@ -16,15 +16,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -71,6 +74,7 @@ import androidx.core.content.ContextCompat
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.CryptoManager
+import org.bouncycastle.math.raw.Mod
 
 fun Context.copyToClipboard(label: String, text: CharSequence) {
     val clipboardManager = ContextCompat.getSystemService(this, ClipboardManager::class.java)
@@ -131,8 +135,8 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
     }
     Column(Modifier
         .fillMaxSize()
+        .imePadding()
         .background(Color.Transparent), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,8 +163,9 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
                     imeAction = ImeAction.Done
                 )
                 Spacer(Modifier.height(20.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Button(
+                        modifier = Modifier.width(100.dp),
                         onClick = { onConfirm(password) }
 
                     ) {
@@ -168,6 +173,7 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
                     }
                     Spacer(Modifier.width(25.dp))
                     Button(
+                        modifier = Modifier.width(100.dp),
                         onClick = { onClose() }
                     ){
                         Text("Close")
@@ -277,11 +283,11 @@ fun ConfirmationDialog(
                 ) {
 
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = onPositiveClick) {
+                    Button(modifier = Modifier.width(100.dp), onClick = onPositiveClick) {
                         Text(stringResource(R.string.confirm))
                     }
                     Spacer(Modifier.width(25.dp))
-                    Button(onClick = onNegativeClick) {
+                    Button(modifier = Modifier.width(100.dp), onClick = onNegativeClick) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -407,6 +413,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .padding(20.dp)
             .background(Color.Transparent),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -420,7 +427,8 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(10.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -481,7 +489,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                     onTrailingIconClick = onTrailingIconClick
                 )
                 Spacer(Modifier.height(20.dp))
-                Row {
+                Row(modifier = Modifier.padding(bottom = 10.dp)) {
                     Button(
                         onClick = {
                             onAddNewPassword(
@@ -590,7 +598,7 @@ fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {})
                 Spacer(modifier = Modifier.height(20.dp))
                 Text("Last Modified: ${data?.getDate()}", fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(20.dp))
-                Button(onClick = { onClose() }) {
+                Button(modifier = Modifier.width(100.dp), onClick = { onClose() }) {
                     Text("Close")
                 }
 

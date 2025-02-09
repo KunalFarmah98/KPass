@@ -112,9 +112,6 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             KPassTheme {
-                var fabEnabled by rememberSaveable {
-                    mutableStateOf(true)
-                }
                 var enterPassword by rememberSaveable {
                     mutableStateOf(false)
                 }
@@ -199,7 +196,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                     },
-                    floatingActionButton = { AddPassword { if (fabEnabled) mainViewModel.openAddOrEditPasswordDialog() } }
+                    floatingActionButton = { AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
                     val biometricResult by promptManager.promptResults.collectAsState(null)
