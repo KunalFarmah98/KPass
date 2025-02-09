@@ -20,4 +20,7 @@ interface PasswordMapDao {
 
     @Query("DELETE FROM passwordmap WHERE id = :id")
     suspend fun deletePassword(id: String)
+
+    @Query("DELETE FROM passwordmap")
+    suspend fun deleteAllPasswords()
 }

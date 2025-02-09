@@ -101,6 +101,13 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
         }
     }
 
+    fun deleteAllPasswords(){
+        viewModelScope.launch(Dispatchers.IO) {
+            passwordRepository.deleteAllPasswords()
+            _passwords.value = DataModel.Success(listOf())
+        }
+    }
+
     fun search(query: String){
         viewModelScope.launch(Dispatchers.IO) {
             if(query.isEmpty()){

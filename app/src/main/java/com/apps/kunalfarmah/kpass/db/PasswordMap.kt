@@ -1,8 +1,11 @@
 package com.apps.kunalfarmah.kpass.db
 
+import android.annotation.SuppressLint
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.apps.kunalfarmah.kpass.security.CryptoManager
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Entity
 data class PasswordMap(
@@ -20,6 +23,12 @@ data class PasswordMap(
 
     fun toDecryptedString(): String{
         return "$websiteName ($websiteUrl)\nusername: $username\nPassword: ${CryptoManager.decrypt(password)}"
+    }
 
+    @SuppressLint("SimpleDateFormat")
+    fun getDate(): String{
+        val date = Date(lastModified)
+        val format = SimpleDateFormat("dd/MM/yyyy HH:mm")
+        return format.format(date)
     }
 }

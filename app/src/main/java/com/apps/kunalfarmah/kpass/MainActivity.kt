@@ -14,8 +14,14 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
@@ -28,17 +34,26 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.ui.components.AddPassword
+import com.apps.kunalfarmah.kpass.ui.components.ConfirmationDialog
 import com.apps.kunalfarmah.kpass.ui.components.EnterPassword
 import com.apps.kunalfarmah.kpass.ui.components.HomeScreen
+import com.apps.kunalfarmah.kpass.ui.components.OptionsMenu
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
@@ -99,6 +114,17 @@ class MainActivity : AppCompatActivity() {
                 var enterPassword by rememberSaveable {
                     mutableStateOf(false)
                 }
+                var changePassword by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                var deleteAllPasswords by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                val isDialogOpen by remember {
+                    derivedStateOf {
+                        enterPassword || changePassword || deleteAllPasswords
+                    }
+                }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
@@ -109,17 +135,38 @@ class MainActivity : AppCompatActivity() {
                                 }
                             },
                             actions = {
-                                IconButton(onClick = {
-                                    mainViewModel.getMasterPassword { password ->
-                                        if(password.isEmpty()){
-                                            enterPassword = true
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
+                                    IconButton(onClick = {
+                                        mainViewModel.getMasterPassword { password ->
+                                            if(password.isEmpty()){
+                                                enterPassword = true
+                                            }
+                                            else {
+                                                export()
+                                            }
                                         }
-                                        else {
-                                            export()
+                                    }) {
+                                        Image(
+                                            painter = painterResource(R.drawable.baseline_save_24),
+                                            contentDescription = "Export passwords",
+                                            colorFilter = ColorFilter.tint(
+                                                Color.White
+                                            )
+                                        )
+                                    }
+                                    OptionsMenu(
+                                        titles = listOf(
+                                            "Delete All",
+                                            "Change export password"
+                                        )
+                                    ) {
+                                        when (it) {
+                                            0 -> {
+                                                deleteAllPasswords = true
+                                            }
+                                            1 -> changePassword = true
                                         }
                                     }
-                                }) {
-                                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Export")
                                 }
                             },
                             colors = TopAppBarColors(
@@ -177,15 +224,47 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
-                                if(enterPassword){
-                                    EnterPassword { password ->
+                                HomeScreen(Modifier
+                                    .padding(innerPadding)
+                                    .blur(if (isDialogOpen) 2.dp else 0.dp), mainViewModel)
+                                if(enterPassword || changePassword){
+                                    EnterPassword(onClose = {
+                                        enterPassword = false
+                                        changePassword = false
+                                    }) { password ->
+                                        if(password.isEmpty()){
+                                            runOnUiThread {
+                                                Toast.makeText(
+                                                    this,
+                                                    getString(R.string.password_can_not_be_empty),
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                            return@EnterPassword
+                                        }
                                         mainViewModel.savePassword(password){
+                                            if(enterPassword) {
+                                                export()
+                                            }
+                                            changePassword = false
                                             enterPassword = false
-                                            export()
                                         }
                                     }
                                 }
-                                HomeScreen(Modifier.padding(innerPadding), mainViewModel)
+                                if(deleteAllPasswords){
+                                    ConfirmationDialog(
+                                        title = "Delete All Passwords",
+                                        body = "Are you sure you want to delete all passwords?\nThey can not be recovered again.",
+                                        onNegativeClick = {
+                                            deleteAllPasswords = false
+
+                                        },
+                                        onPositiveClick = {
+                                            mainViewModel.deleteAllPasswords()
+                                            deleteAllPasswords = false
+                                        }
+                                    )
+                                }
                             }
 
                             BiometricPromptManager.BiometricResult.FeatureUnavailable -> {

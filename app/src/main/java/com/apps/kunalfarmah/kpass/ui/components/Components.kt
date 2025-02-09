@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,12 +30,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -75,6 +79,31 @@ fun Context.copyToClipboard(label: String, text: CharSequence) {
     Toast.makeText(this, "Copied $label to clipboard", Toast.LENGTH_SHORT).show()
 }
 
+@Preview
+@Composable
+fun OptionsMenu(titles: List<String> = listOf(), onClickListener: (index: Int) -> Unit = {}){
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = !expanded }) {
+            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            titles.forEachIndexed { index, s ->
+                DropdownMenuItem(
+                    text = { Text(s) },
+                    onClick = {
+                        expanded = false
+                        onClickListener(index)
+                    }
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun PasswordsList(
     passwords: List<PasswordMap>, onItemClick: (data: PasswordMap) -> Unit = {},
@@ -96,7 +125,7 @@ fun PasswordsList(
 
 @Preview
 @Composable
-fun EnterPassword(onConfirm: (String) -> Unit = {}){
+fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
     var password by rememberSaveable {
         mutableStateOf("")
     }
@@ -130,11 +159,19 @@ fun EnterPassword(onConfirm: (String) -> Unit = {}){
                     imeAction = ImeAction.Done
                 )
                 Spacer(Modifier.height(20.dp))
-                Button(
-                    onClick = { onConfirm(password) },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("Confirm")
+                Row(modifier = Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    Button(
+                        onClick = { onConfirm(password) }
+
+                    ) {
+                        Text("Confirm")
+                    }
+                    Spacer(Modifier.width(25.dp))
+                    Button(
+                        onClick = { onClose() }
+                    ){
+                        Text("Close")
+                    }
                 }
             }
         }
@@ -550,6 +587,8 @@ fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {})
                         Image(painterResource(R.drawable.baseline_content_copy_24), contentDescription = "copy", colorFilter = ColorFilter.tint(Color.Black))
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Last Modified: ${data?.getDate()}", fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(onClick = { onClose() }) {
                     Text("Close")

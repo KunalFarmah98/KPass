@@ -32,4 +32,8 @@ class PasswordRepository(private val passwordMapDao: PasswordMapDao){
         passwordMapDao.deletePassword(id)
     }
 
+    suspend fun deleteAllPasswords(){
+        passwordMapDao.deleteAllPasswords()
+    }
+
 }
