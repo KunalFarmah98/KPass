@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,6 +90,12 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
         mutableStateOf(false)
     }
 
+    var addedItemIndex by rememberSaveable {
+        mutableIntStateOf(-1)
+    }
+
+    val listState = rememberLazyListState()
+
     val isDialogOpen by remember {
         derivedStateOf {
             openAddPasswordDialog || openEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog
@@ -116,6 +124,12 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
 
     LaunchedEffect(isDialogOpen) {
         setFabState(!isDialogOpen)
+    }
+
+    LaunchedEffect(addedItemIndex){
+        if(addedItemIndex != -1) {
+            listState.animateScrollToItem(addedItemIndex)
+        }
     }
 
 
@@ -153,6 +167,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                     viewModel.search(query)
                 }, enabled = !isDialogOpen)
                 PasswordsList(
+                    state = listState,
                     passwords = (passwords as DataModel.Success).data,
                     onEditClick = { data: PasswordMap ->
                         if (!isDialogOpen)
@@ -187,7 +202,9 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                     username = data.username,
                     password = data.password,
                     isUpdate = false
-                )
+                ){
+                    addedItemIndex = it
+                }
                 viewModel.closeAddOrEditPasswordDialog()
             },
             onClose = {
