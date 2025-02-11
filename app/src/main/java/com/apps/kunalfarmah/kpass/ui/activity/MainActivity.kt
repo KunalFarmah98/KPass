@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -253,14 +254,7 @@ class MainActivity : AppCompatActivity() {
                     biometricResult?.let { result ->
                         when (result) {
                             is BiometricPromptManager.BiometricResult.AuthenticationError -> {
-                                Toast.makeText(
-                                    applicationContext,
-                                    stringResource(
-                                        R.string.authentication_failed_due_to,
-                                        result.error
-                                    ),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Log.e("AuthenticationError", result.error)
                                 finish()
                             }
 

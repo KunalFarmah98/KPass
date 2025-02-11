@@ -208,8 +208,7 @@ fun PasswordItem(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-            Text(modifier = Modifier.padding(20.dp), fontSize = 18.sp, text = password.websiteName, fontWeight = FontWeight.Bold, color = Color.Black)
-            Spacer(Modifier.height(10.dp))
+            Text(modifier = Modifier.fillMaxWidth().padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 15.dp), fontSize = 16.sp, textAlign = TextAlign.Center, text = password.websiteName, fontWeight = FontWeight.Bold, color = Color.Black)
             Row(modifier = Modifier
                 .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
                 .fillMaxWidth(),
@@ -217,26 +216,22 @@ fun PasswordItem(
             ) {
                 Icon(modifier =  Modifier
                     .weight(1f)
-                    .size(20.dp), imageVector = Icons.Filled.Person, contentDescription = "person", tint = Color.Black)
-                Spacer(Modifier.width(20.dp))
-                Text(modifier = Modifier.weight(5f), text = password.username, maxLines = 2, fontSize = 16.sp)
-                Spacer(modifier = Modifier.width(20.dp))
+                    .size(18.dp), imageVector = Icons.Filled.Person, contentDescription = "person", tint = Color.Black)
+                Text(modifier = Modifier.weight(6f), text = password.username, maxLines = 2, fontSize = 14.sp)
                 Image(modifier = Modifier
                     .weight(1f)
-                    .size(20.dp)
+                    .size(18.dp)
                     .clickable {
                         onItemClick(password)
                     }, painter = painterResource(R.drawable.baseline_visibility_24), contentDescription = "view", colorFilter = ColorFilter.tint(Color.Black))
-                Spacer(Modifier.width(5.dp))
                 IconButton(modifier = Modifier
                     .weight(1f)
-                    .size(20.dp), onClick = {onEditClick(password)}) {
+                    .size(18.dp), onClick = {onEditClick(password)}) {
                     Icon(Icons.Filled.Edit, "edit", tint = Color.Black)
                 }
-                Spacer(Modifier.width(5.dp))
                 IconButton(modifier = Modifier
                     .weight(1f)
-                    .size(20.dp), onClick = {onDeleteClick(password)}) {
+                    .size(18.dp), onClick = {onDeleteClick(password)}) {
                     Icon(Icons.Filled.Delete, "delete", tint = Color.Black)
                 }
             }
