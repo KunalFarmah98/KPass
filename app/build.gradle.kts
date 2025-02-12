@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.itext.bouncycastle.adapter)
     implementation(libs.datastore.preferences)
     implementation(libs.splashscreen)
+    implementation(libs.slf4j)
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.lifecycle.runtime.compose)
