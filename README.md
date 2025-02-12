@@ -13,6 +13,20 @@
     
 ## The person best suited to protect your passwords is YOU.
 
+<p>
+    
+</p>
+<p vspace = "20" align="center" >
+   <img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/splash.png">
+   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/locked.png" width =175 
+  height = 350/>
+   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/add_empty.png" width =175 
+  height = 350/>
+  <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/home.png" width =175 
+  height = 350/>
+    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/details.png" width =175 
+  height = 350/>
+</p>
 
 
 ## Features
@@ -27,6 +41,19 @@
 - ### Simple and intuitive UI.
 - ### All passwords are encrypted using AES.
 
+<p vspace = "20" align="center" >
+   <img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/update.png">
+   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/copied.png" width =175 
+  height = 350/>
+   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/search.png" width =175 
+  height = 350/>
+  <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/search_result.png" width =175 
+  height = 350/>
+    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/delete.png" width =175 
+  height = 350/>
+</p>
+
+
 
 
 ## Usage
@@ -40,7 +67,17 @@
 ### 7. Delete any password using the delete button.
 ### 8. Clear all passwords using delete all option.
 
-
+<p vspace = "20" align="center" >
+<img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/export_password.png"/>
+<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/password_protected_pdf.png" width =175 
+  height = 350/>
+<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/passwords_pdf.png" width =175 
+  height = 350/>
+<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/options.png" width =175 
+  height = 350/>
+<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/delete_all.png" width =175 
+  height = 350/>
+</p>
 
 ## Contributing
 
