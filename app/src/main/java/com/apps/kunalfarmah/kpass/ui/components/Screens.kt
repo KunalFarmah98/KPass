@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.apps.kunalfarmah.kpass.db.PasswordMap
@@ -93,6 +94,8 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
     var addedItemIndex by rememberSaveable {
         mutableIntStateOf(-1)
     }
+
+    val context = LocalContext.current
 
     val listState = rememberLazyListState()
 
@@ -169,6 +172,9 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                 PasswordsList(
                     state = listState,
                     passwords = (passwords as DataModel.Success).data,
+                    onCopyClick = { data: PasswordMap ->
+                        context.copyToClipboard(label = "password", CryptoManager.decrypt(data.password))
+                    },
                     onEditClick = { data: PasswordMap ->
                         if (!isDialogOpen)
                             viewModel.openAddOrEditPasswordDialog(data, true)

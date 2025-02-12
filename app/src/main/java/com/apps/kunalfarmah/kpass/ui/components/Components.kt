@@ -114,7 +114,9 @@ fun OptionsMenu(titles: List<String> = listOf(), onClickListener: (title: String
 fun PasswordsList(
     state: LazyListState = rememberLazyListState(),
     passwords: List<PasswordMap>, onItemClick: (data: PasswordMap) -> Unit = {},
-    onEditClick: (data: PasswordMap) -> Unit = {}, onDeleteClick: (data: PasswordMap) -> Unit = {}
+    onCopyClick: (data: PasswordMap) -> Unit = {},
+    onEditClick: (data: PasswordMap) -> Unit = {},
+    onDeleteClick: (data: PasswordMap) -> Unit = {}
 ) {
     if (passwords.isEmpty()){
         NoPasswords()
@@ -126,7 +128,7 @@ fun PasswordsList(
             state = state
             ) {
             items(items = passwords, key = { it.id }) {
-                PasswordItem(it, onItemClick, onEditClick, onDeleteClick)
+                PasswordItem(it, onItemClick, onCopyClick, onEditClick, onDeleteClick)
             }
         }
     }
@@ -194,6 +196,7 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
 fun PasswordItem(
     password: PasswordMap,
     onItemClick: (data: PasswordMap) -> Unit = {},
+    onCopyClick: (data: PasswordMap) -> Unit = {},
     onEditClick: (data: PasswordMap) -> Unit = {},
     onDeleteClick: (data: PasswordMap) -> Unit = {}
 ) {
@@ -208,7 +211,7 @@ fun PasswordItem(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-            Text(modifier = Modifier.fillMaxWidth().padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 15.dp), fontSize = 16.sp, textAlign = TextAlign.Center, text = password.websiteName, fontWeight = FontWeight.Bold, color = Color.Black)
+            Text(modifier = Modifier.padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 15.dp), fontSize = 16.sp, text = password.websiteName, fontWeight = FontWeight.Bold, color = Color.Black)
             Row(modifier = Modifier
                 .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
                 .fillMaxWidth(),
@@ -222,8 +225,8 @@ fun PasswordItem(
                     .weight(1f)
                     .size(18.dp)
                     .clickable {
-                        onItemClick(password)
-                    }, painter = painterResource(R.drawable.baseline_visibility_24), contentDescription = "view", colorFilter = ColorFilter.tint(Color.Black))
+                        onCopyClick(password)
+                    }, painter = painterResource(R.drawable.baseline_content_copy_24), contentDescription = "copy", colorFilter = ColorFilter.tint(Color.Black))
                 IconButton(modifier = Modifier
                     .weight(1f)
                     .size(18.dp), onClick = {onEditClick(password)}) {
