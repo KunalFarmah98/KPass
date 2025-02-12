@@ -1,6 +1,5 @@
 # KPass - A simple offline password manager
 
-<br />
 
 ## In the age of cloud backed password manager, what if you
 - #### Don't want your passwords to be stored on the cloud?
@@ -15,11 +14,6 @@
 
 <br />
     
-## The person best suited to protect your passwords is YOU.
-
-<br />
-
-
 ## Features
 
 - #### Store and manage your passwords securely offline.
@@ -32,7 +26,6 @@
 - #### Simple and intuitive UI.
 - #### All passwords are encrypted using AES.
 
-<br />
 <br />
 
 ## Screenshots
@@ -47,35 +40,40 @@
   height = 350/>
   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/home.png" width =175 
   height = 350/>
-    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/details.png" width =175 
-  height = 350/>
 </p>
 
 <br />
 
 <p vspace = "20" align="center" >
+   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/details.png" width =175 
+  height = 350/>
    <img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/update.png">
    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/copied.png" width =175 
   height = 350/>
-   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/search.png" width =175 
-  height = 350/>
-  <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/search_result.png" width =175 
-  height = 350/>
-    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/delete.png" width =175 
+   <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/delete.png" width =175 
   height = 350/>
 </p>
 
 <br />
 <p vspace = "20" align="center" >
-<img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/export_password.png"/>
-<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/password_protected_pdf.png" width =175 
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/search.png" width =175   
+           height = 350/>
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/search_result.png" width =175 
   height = 350/>
-<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/passwords_pdf.png" width =175 
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/options.png" width =175 
   height = 350/>
-<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/options.png" width =175 
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/delete_all.png" width =175 
   height = 350/>
-<img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/delete_all.png" width =175 
+</p>
+
+<p vspace = "20" align="center" >
+ <img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/export_password.png"/>
+ <img width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/select_location.png"/>
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/password_protected_pdf.png" width =175 
   height = 350/>
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/main/res/raw/passwords_pdf.png" width =175 
+  height = 350/>
+
 </p>
 <br />
 
@@ -91,6 +89,9 @@
 #### 8. Clear all passwords using delete all option.
 
 <br />
+
+## The person best suited to protect your passwords is YOU.
+
 <br />
 
 ## Contributing
@@ -113,7 +114,6 @@ Contributions are always welcome!.
    ```
 6. Open a pull request.
 
-<br />
 <br />
 
 ## License
