@@ -2,30 +2,25 @@ import java.security.SecureRandom
 
 object PasswordGenerator {
     fun generateSecurePassword(length: Int): String {
-        // Define character pools.
         val lowerPool = "abcdefghijklmnopqrstuvwxyz"
         val upperPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         val digitsPool = "0123456789"
-        val specialPool = "!@#$%^&*()_-+=<>?/[]{}|~.,"
+        val specialPool = "!@#$%^&*()"
 
         // Maximum unique characters available:
-        val maxUnique =
-            26 + digitsPool.length + specialPool.length  // 26 letters (ignoring case) + 10 digits + 10 specials = 46
+        val maxUnique = 26 + digitsPool.length + specialPool.length  // 26 letters (ignoring case) + 10 digits + 10 specials = 46
         if (length > maxUnique) {
             throw IllegalArgumentException("Requested length $length exceeds maximum unique characters: $maxUnique")
         }
 
-        // A secure random generator.
         val secureRandom = SecureRandom()
-
-        // Our candidate characters and a set for letters (to ensure case-insensitive uniqueness)
         val candidates = mutableListOf<Char>()
-        val usedLetters = mutableSetOf<Char>() // stores letters in lowercase
+        // To guarantee uniqueness for letters irrespective of case.
+        val usedLetters = mutableSetOf<Char>()
 
-        // Helper function to add letters from a given pool, using toList() for safe filtering.
+        // Helper: add letters from a pool while ensuring that neither the letter nor its opposite case has been used.
         fun addLetter(fromPool: String, count: Int = 1) {
-            val available =
-                fromPool.toList().filter { ch -> !usedLetters.contains(ch.toLowerCase()) }
+            val available = fromPool.toList().filter { ch -> !usedLetters.contains(ch.toLowerCase()) }
             if (available.size < count) {
                 throw IllegalArgumentException("Not enough unique letters available from pool $fromPool")
             }
@@ -35,7 +30,7 @@ object PasswordGenerator {
             }
         }
 
-        // Helper function to add digits (they are simple; uniqueness is checked against current candidates)
+        // Helper: add digits.
         fun addDigit(count: Int) {
             val available = digitsPool.toList().filter { ch -> ch !in candidates }
             if (available.size < count) {
@@ -46,7 +41,7 @@ object PasswordGenerator {
             }
         }
 
-        // Helper function to add special characters.
+        // Helper: add special characters.
         fun addSpecial(count: Int) {
             val available = specialPool.toList().filter { ch -> ch !in candidates }
             if (available.size < count) {
@@ -57,32 +52,28 @@ object PasswordGenerator {
             }
         }
 
-        // Build the candidate list based on the required constraints.
+        // Gather candidates according to the required constraints.
         if (length > 8) {
-            // Mandatory counts per constraints.
+            // Add the mandatory counts.
             addLetter(lowerPool, 3)    // 3 lowercase letters.
             addLetter(upperPool, 2)    // 2 uppercase letters.
             addDigit(2)                // 2 digits.
             addSpecial(2)              // 2 special characters.
-            // Mandatory added: 3 + 2 + 2 + 2 = 9.
             val mandatoryCount = 9
             val extraCount = length - mandatoryCount
 
-            // Add extra characters while ensuring uniqueness and orderability.
+            // Add extra characters one by one from any pool while ensuring uniqueness.
             for (i in 0 until extraCount) {
                 val availableChars = mutableListOf<Char>()
-                availableChars.addAll(
-                    lowerPool.toList()
-                        .filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
-                availableChars.addAll(
-                    upperPool.toList()
-                        .filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
+                availableChars.addAll(lowerPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
+                availableChars.addAll(upperPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
                 availableChars.addAll(digitsPool.toList().filter { it !in candidates })
                 availableChars.addAll(specialPool.toList().filter { it !in candidates })
 
                 if (availableChars.isEmpty()) break
 
-                // Validate before adding a special: ensure that the specials remain interspersible.
+                // For a special candidate, ensure that it won’t exceed the number of non-specials—
+                // a necessary condition for interleaving.
                 val currentLetters = candidates.count { it.isLetter() }
                 val currentDigits = candidates.count { it.isDigit() }
                 val currentNonSpecial = currentLetters + currentDigits
@@ -95,7 +86,6 @@ object PasswordGenerator {
                         true
                     }
                 }
-
                 val extraOptions = if (filtered.isNotEmpty()) filtered else availableChars
                 val chosen = extraOptions.shuffled(secureRandom).first()
                 if (chosen.isLetter()) {
@@ -104,16 +94,12 @@ object PasswordGenerator {
                 candidates.add(chosen)
             }
         } else {
-            // For passwords 8 characters or less, ensure that the first character will be a letter.
+            // For password lengths 8 or less, force one letter at the beginning.
             addLetter(lowerPool, 1)
             for (i in 1 until length) {
                 val availableChars = mutableListOf<Char>()
-                availableChars.addAll(
-                    lowerPool.toList()
-                        .filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
-                availableChars.addAll(
-                    upperPool.toList()
-                        .filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
+                availableChars.addAll(lowerPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
+                availableChars.addAll(upperPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
                 availableChars.addAll(digitsPool.toList().filter { it !in candidates })
                 availableChars.addAll(specialPool.toList().filter { it !in candidates })
                 if (availableChars.isEmpty()) break
@@ -125,52 +111,57 @@ object PasswordGenerator {
             }
         }
 
-        // Arrange the candidates so that:
-        // (a) The first character is a letter.
-        // (b) No two special characters are adjacent.
-        val maxShuffleAttempts = 1000
-        var chosenPassword: String? = null
-        val candidateSnapshot = candidates.toList()
-        for (attempt in 0 until maxShuffleAttempts) {
-            val shuffled = candidateSnapshot.shuffled(secureRandom)
-            if (!shuffled.first().isLetter()) continue
-            var valid = true
-            for (i in 1 until shuffled.size) {
-                if (specialPool.contains(shuffled[i]) && specialPool.contains(shuffled[i - 1])) {
-                    valid = false
-                    break
-                }
-            }
-            if (valid) {
-                chosenPassword = shuffled.joinToString("")
-                break
-            }
+        // --- Arrangement Step ---
+        // Rather than repeatedly trying random shuffles, partition the candidates into non‑specials (letters and digits)
+        // and specials. Then, interleave the specials deterministically into the non‑special sequence.
+        val nonSpecialCandidates = candidates.filter { !specialPool.contains(it) }.toMutableList()
+        val specialCandidates = candidates.filter { specialPool.contains(it) }.toMutableList()
+
+        // Randomize each group.
+        nonSpecialCandidates.shuffle(secureRandom)
+        specialCandidates.shuffle(secureRandom)
+
+        // Ensure the first candidate is a letter.
+        if (nonSpecialCandidates.isEmpty() || nonSpecialCandidates.none { it.isLetter() }) {
+            throw RuntimeException("No letter available to start the password")
+        }
+        if (!nonSpecialCandidates[0].isLetter()) {
+            val letterIndex = nonSpecialCandidates.indexOfFirst { it.isLetter() }
+            val temp = nonSpecialCandidates[0]
+            nonSpecialCandidates[0] = nonSpecialCandidates[letterIndex]
+            nonSpecialCandidates[letterIndex] = temp
         }
 
-        if (chosenPassword == null) {
-            val result = CharArray(candidates.size)
-            val usedIndex = BooleanArray(candidates.size)
-
-            fun backtrack(pos: Int): Boolean {
-                if (pos == result.size) return true
-                for (i in candidates.indices.shuffled(secureRandom)) {
-                    if (usedIndex[i]) continue
-                    val ch = candidates[i]
-                    if (pos == 0 && !ch.isLetter()) continue
-                    if (pos > 0 && specialPool.contains(result[pos - 1]) && specialPool.contains(ch)) continue
-                    usedIndex[i] = true
-                    result[pos] = ch
-                    if (backtrack(pos + 1)) return true
-                    usedIndex[i] = false
-                }
-                return false
-            }
-
-            if (!backtrack(0)) {
-                throw RuntimeException("Unable to generate valid password permutation")
-            }
-            chosenPassword = String(result)
+        // Check that insertion is feasible.
+        // We have nonSpecialCandidates.size available gaps (one after each non‑special element).
+        if (specialCandidates.size > nonSpecialCandidates.size) {
+            throw RuntimeException("Cannot arrange characters to satisfy no adjacent special rule")
         }
-        return chosenPassword
+
+        // Determine which gaps will hold a special character.
+        // The available gap positions are labeled 1..nonSpecialCandidates.size (i.e. after each ns element).
+        val gapPositions = (1..nonSpecialCandidates.size).toMutableList()
+        gapPositions.shuffle(secureRandom)
+        val chosenGaps = gapPositions.take(specialCandidates.size).sorted()
+
+        // Build the final password by taking a non‑special element and inserting specials in the chosen gaps.
+        val finalList = mutableListOf<Char>()
+        var specialIndex = 0
+        for (i in nonSpecialCandidates.indices) {
+            finalList.add(nonSpecialCandidates[i])
+            // If the gap right after ns element at index i (i.e. gap position i+1) is chosen, insert one special.
+            if ((i + 1) in chosenGaps && specialIndex < specialCandidates.size) {
+                finalList.add(specialCandidates[specialIndex])
+                specialIndex++
+            }
+        }
+        // (If any special still remains, append it—this shouldn’t normally happen.)
+        while (specialIndex < specialCandidates.size) {
+            finalList.add(specialCandidates[specialIndex])
+            specialIndex++
+        }
+
+        return finalList.joinToString("")
     }
+
 }
