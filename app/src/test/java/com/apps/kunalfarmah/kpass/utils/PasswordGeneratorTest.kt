@@ -24,7 +24,6 @@ class PasswordGeneratorTest {
     @Test
     fun `Password length 8`() {
         val password = PasswordGenerator.generateSecurePassword(8)
-        println("password: $password")
         assertEquals(8, password.length)
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
@@ -35,7 +34,6 @@ class PasswordGeneratorTest {
     @Test
     fun `Password length 10`() {
         val password = PasswordGenerator.generateSecurePassword(10)
-        println("password: $password")
         assertEquals(10, password.length)
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
@@ -46,7 +44,6 @@ class PasswordGeneratorTest {
     @Test
     fun `Password length 15`() {
         val password = PasswordGenerator.generateSecurePassword(15)
-        println("password: $password")
         assertEquals(15, password.length)
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
@@ -57,7 +54,6 @@ class PasswordGeneratorTest {
     @Test
     fun `Password length 20`() {
         val password = PasswordGenerator.generateSecurePassword(20)
-        println("password: $password")
         assertEquals(20, password.length)
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
@@ -68,7 +64,6 @@ class PasswordGeneratorTest {
     @Test
     fun `Password length 25`() {
         val password = PasswordGenerator.generateSecurePassword(25)
-        println("password: $password")
         assertEquals(25, password.length)
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
@@ -142,9 +137,6 @@ class PasswordGeneratorTest {
 
         for (i in 0 until numPasswords) {
             val password = PasswordGenerator.generateSecurePassword(passwordLength)
-            println("password [$i]: $password")
-            if (password.isEmpty()) continue
-
             var lowercaseCount = 0
             var uppercaseCount = 0
             var specialCharCount = 0
