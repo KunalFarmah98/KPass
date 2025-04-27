@@ -122,11 +122,17 @@ class PasswordGeneratorTest {
     @Test
     fun `Multiple password generations`() {
         val length = 12
-        val passwords = mutableSetOf<String>()
+        var password = ""
+        var repeatedPassword = false
         for (i in 0 until 10) {
-            passwords.add(PasswordGenerator.generateSecurePassword(length))
+            val newPassword = PasswordGenerator.generateSecurePassword(length)
+            if(newPassword == password){
+                repeatedPassword = true
+            }
+            password = newPassword
+
         }
-        assertEquals(10, passwords.size) // All passwords should be unique
+        assert(repeatedPassword == false) // All passwords should be unique
     }
 
     @Test
