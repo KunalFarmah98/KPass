@@ -125,7 +125,7 @@ fun AlphabeticalScrollbar(
 ) {
     Column(
         modifier = modifier
-            .padding(start = 10.dp, top = 5.dp, end = 5.dp, bottom = 60.dp)
+            .padding(start = 10.dp, top = 10.dp, end = 5.dp, bottom = 60.dp)
             .width(22.dp)
             .border(
                 width = 0.5.dp,

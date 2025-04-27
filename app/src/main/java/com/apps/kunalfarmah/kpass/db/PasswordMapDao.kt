@@ -15,7 +15,7 @@ interface PasswordMapDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updatePassword(passwordMap: PasswordMap)
 
-    @Query("SELECT * FROM passwordmap ORDER BY websiteName ASC")
+    @Query("SELECT * FROM passwordmap ORDER BY websiteName COLLATE NOCASE ASC")
     suspend fun getAllPasswords(): List<PasswordMap>
 
     @Query("DELETE FROM passwordmap WHERE id = :id")
