@@ -55,6 +55,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -77,6 +78,7 @@ import androidx.core.content.ContextCompat
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.CryptoManager
+import kotlinx.coroutines.launch
 
 fun Context.copyToClipboard(label: String, text: CharSequence) {
     val clipboardManager = ContextCompat.getSystemService(this, ClipboardManager::class.java)
@@ -110,6 +112,32 @@ fun OptionsMenu(titles: List<String> = listOf(), onClickListener: (title: String
     }
 }
 
+
+@Composable
+fun AlphabeticalScrollbar(
+    modifier: Modifier = Modifier,
+    onLetterClicked: (Char) -> Unit
+) {
+    Column(modifier = modifier
+        .padding(start = 10.dp, top = 5.dp, end = 5.dp, bottom = 60.dp)
+        .width(20.dp)
+    ) {
+        ('A'..'Z').toList().forEach { letter ->
+                Text(
+                    text = letter.toString(),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clickable {
+                            onLetterClicked(letter)
+                        }
+                )
+        }
+    }
+}
+
+
 @Composable
 fun PasswordsList(
     state: LazyListState = rememberLazyListState(),
@@ -118,17 +146,33 @@ fun PasswordsList(
     onEditClick: (data: PasswordMap) -> Unit = {},
     onDeleteClick: (data: PasswordMap) -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     if (passwords.isEmpty()){
         NoPasswords()
     }
     else {
-        LazyColumn(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top=10.dp),
-            state = state
+        Row(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(start = 20.dp)
+                    .weight(1f),
+                contentPadding = PaddingValues(bottom = 10.dp),
+                state = state
             ) {
-            items(items = passwords, key = { it.id }) {
-                PasswordItem(it, onItemClick, onCopyClick, onEditClick, onDeleteClick)
+                items(items = passwords, key = { it.id }) {
+                    PasswordItem(it, onItemClick, onCopyClick, onEditClick, onDeleteClick)
+                }
+            }
+            AlphabeticalScrollbar(modifier = Modifier.align(Alignment.CenterVertically)) { letter ->
+                passwords.indexOfFirst {
+                    it.websiteName[0].lowercase() == letter.lowercase()
+                }.let {
+                    if (it != -1) {
+                        scope.launch {
+                            state.scrollToItem(index = it)
+                        }
+                    }
+                }
             }
         }
     }
@@ -170,7 +214,9 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
                     imeAction = ImeAction.Done
                 )
                 Spacer(Modifier.height(20.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     Button(
                         modifier = Modifier.width(100.dp),
                         onClick = { onConfirm(password) }
@@ -432,7 +478,8 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier
+                    .padding(10.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
