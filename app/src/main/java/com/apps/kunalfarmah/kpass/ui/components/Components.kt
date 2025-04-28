@@ -470,6 +470,8 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
         mutableStateOf(isEditable)
     }
 
+    val context = LocalContext.current
+
     var selectedLength by rememberSaveable {
         val initialLength = if (pass.isNotEmpty()) {
             // Find the closest available length to pass.length
@@ -604,6 +606,18 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                 Row(modifier = Modifier.padding(bottom = 10.dp)) {
                     Button(
                         onClick = {
+                            if(websiteNameState.isEmpty() || usernameState.isEmpty() || passwordState.isEmpty()){
+                                if(websiteNameState.isEmpty()){
+                                    Toast.makeText(context, "Please enter a website name", Toast.LENGTH_SHORT).show()
+                                }
+                                else if(usernameState.isEmpty()){
+                                    Toast.makeText(context, "Please enter a username", Toast.LENGTH_SHORT).show()
+                                }
+                                else if(passwordState.isEmpty()){
+                                    Toast.makeText(context, "Please enter a password", Toast.LENGTH_SHORT).show()
+                                }
+                                return@Button
+                            }
                             onAddNewPassword(
                                 PasswordMap(
                                     id = id.let{
