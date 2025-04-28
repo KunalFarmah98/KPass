@@ -10,6 +10,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -652,6 +653,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
 @Preview
 @Composable
 fun PasswordLengthChip(value: String = "15", isSelected: Boolean = false, onSelected: (Int) -> Unit = {}){
+    val interactionSource = remember { MutableInteractionSource() }
     Box(modifier = Modifier
         .width(40.dp)
         .height(25.dp)
@@ -664,7 +666,8 @@ fun PasswordLengthChip(value: String = "15", isSelected: Boolean = false, onSele
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.secondary
         )
-        .clickable {
+        .indication(interactionSource, null)
+        .clickable(interactionSource = interactionSource, indication = null) {
             onSelected(value.toInt())
         },
         contentAlignment = Alignment.Center
