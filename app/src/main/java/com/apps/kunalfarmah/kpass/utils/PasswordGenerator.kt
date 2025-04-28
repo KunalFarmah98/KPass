@@ -23,13 +23,13 @@ object PasswordGenerator {
 
         // Helper: add letters from a pool while ensuring that neither the letter nor its opposite case has been used.
         fun addLetter(fromPool: String, count: Int = 1) {
-            val available = fromPool.toList().filter { ch -> !usedLetters.contains(ch.toLowerCase()) }
+            val available = fromPool.toList().filter { ch -> !usedLetters.contains(ch.lowercaseChar()) }
             if (available.size < count) {
                 throw IllegalArgumentException("Not enough unique letters available from pool $fromPool")
             }
             available.shuffled(secureRandom).take(count).forEach { ch ->
                 candidates.add(ch)
-                usedLetters.add(ch.toLowerCase())
+                usedLetters.add(ch.lowercaseChar())
             }
         }
 
@@ -68,8 +68,8 @@ object PasswordGenerator {
             // Add extra characters one by one from any pool while ensuring uniqueness.
             for (i in 0 until extraCount) {
                 val availableChars = mutableListOf<Char>()
-                availableChars.addAll(lowerPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
-                availableChars.addAll(upperPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
+                availableChars.addAll(lowerPool.toList().filter { it !in candidates && !usedLetters.contains(it.lowercaseChar()) })
+                availableChars.addAll(upperPool.toList().filter { it !in candidates && !usedLetters.contains(it.lowercaseChar()) })
                 availableChars.addAll(digitsPool.toList().filter { it !in candidates })
                 availableChars.addAll(specialPool.toList().filter { it !in candidates })
 
@@ -92,7 +92,7 @@ object PasswordGenerator {
                 val extraOptions = if (filtered.isNotEmpty()) filtered else availableChars
                 val chosen = extraOptions.shuffled(secureRandom).first()
                 if (chosen.isLetter()) {
-                    usedLetters.add(chosen.toLowerCase())
+                    usedLetters.add(chosen.lowercaseChar())
                 }
                 candidates.add(chosen)
             }
@@ -101,14 +101,14 @@ object PasswordGenerator {
             addLetter(lowerPool, 1)
             for (i in 1 until length) {
                 val availableChars = mutableListOf<Char>()
-                availableChars.addAll(lowerPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
-                availableChars.addAll(upperPool.toList().filter { it !in candidates && !usedLetters.contains(it.toLowerCase()) })
+                availableChars.addAll(lowerPool.toList().filter { it !in candidates && !usedLetters.contains(it.lowercaseChar()) })
+                availableChars.addAll(upperPool.toList().filter { it !in candidates && !usedLetters.contains(it.lowercaseChar()) })
                 availableChars.addAll(digitsPool.toList().filter { it !in candidates })
                 availableChars.addAll(specialPool.toList().filter { it !in candidates })
                 if (availableChars.isEmpty()) break
                 val chosen = availableChars.shuffled(secureRandom).first()
                 if (chosen.isLetter()) {
-                    usedLetters.add(chosen.toLowerCase())
+                    usedLetters.add(chosen.lowercaseChar())
                 }
                 candidates.add(chosen)
             }
