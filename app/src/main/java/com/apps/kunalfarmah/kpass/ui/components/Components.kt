@@ -483,7 +483,7 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
         mutableIntStateOf(initialLength)
     }
 
-    val trailingIcon = if(isEditable)Icons.Outlined.Edit else null
+    val trailingIcon = if(isEditable) Icons.Outlined.Edit else null
     val onTrailingIconClick = {
         if(readOnly){
             readOnly = false
@@ -682,7 +682,7 @@ fun PasswordLengthChip(value: String = "15", isSelected: Boolean = false, onSele
 @Preview
 @Composable
 fun PasswordDetail(data: PasswordMap? = PasswordMap(), onClose: () -> Unit = {}){
-    val password = if(data?.password.isNullOrEmpty()) "" else CryptoManager.decrypt(data!!.password)
+    val password = if(data?.password.isNullOrEmpty()) "" else CryptoManager.decrypt(data.password)
     val context = LocalContext.current
     Column(
         modifier = Modifier
