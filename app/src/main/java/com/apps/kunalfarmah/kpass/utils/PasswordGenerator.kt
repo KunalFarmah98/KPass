@@ -1,6 +1,9 @@
 import java.security.SecureRandom
 
 object PasswordGenerator {
+
+    val availablePasswordLengths = listOf<Int>(8, 15, 20, 25, 30)
+
     fun generateSecurePassword(length: Int): String {
         val lowerPool = "abcdefghijklmnopqrstuvwxyz"
         val upperPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

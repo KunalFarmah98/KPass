@@ -1,5 +1,6 @@
 package com.apps.kunalfarmah.kpass.ui.components
 
+import PasswordGenerator.availablePasswordLengths
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -42,7 +43,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,6 +58,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,13 +86,6 @@ import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.security.CryptoManager
 import kotlinx.coroutines.launch
-
-fun Context.copyToClipboard(label: String, text: CharSequence) {
-    val clipboardManager = ContextCompat.getSystemService(this, ClipboardManager::class.java)
-    val clip = ClipData.newPlainText(label, text)
-    clipboardManager?.setPrimaryClip(clip)
-    Toast.makeText(this, "Copied $label to clipboard", Toast.LENGTH_SHORT).show()
-}
 
 @Preview
 @Composable
@@ -139,7 +134,11 @@ fun AlphabeticalScrollbar(
                     .weight(1f)
                     .fillMaxWidth()
                     .clickable(
-                        indication = ripple(bounded = true, radius = 10.dp, color = MaterialTheme.colorScheme.primary),
+                        indication = ripple(
+                            bounded = true,
+                            radius = 10.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
                         onClick = { onLetterClicked(letter) },
                         interactionSource = remember { MutableInteractionSource() }
                     ),
@@ -471,11 +470,26 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
         mutableStateOf(isEditable)
     }
 
+    var selectedLength by rememberSaveable {
+        val initialLength = if (pass.isNotEmpty()) {
+            // Find the closest available length to pass.length
+            availablePasswordLengths.minByOrNull { kotlin.math.abs(it - pass.length) } ?: 15
+        } else {
+            // Default to 15 if pass is empty
+            15
+        }
+        mutableIntStateOf(initialLength)
+    }
+
     val trailingIcon = if(isEditable)Icons.Outlined.Edit else null
     val onTrailingIconClick = {
         if(readOnly){
             readOnly = false
         }
+    }
+
+    fun onLengthSelected(len: Int) {
+        selectedLength = len
     }
 
     Column(
@@ -557,7 +571,36 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                     trailingIcon = trailingIcon,
                     onTrailingIconClick = onTrailingIconClick
                 )
+
                 Spacer(Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = "Length:", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    availablePasswordLengths.forEach {
+                        PasswordLengthChip(
+                            value = it.toString(),
+                            isSelected = selectedLength == it,
+                            onSelected = { onLengthSelected(it) })
+                    }
+                }
+
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 15.dp, end = 10.dp), horizontalArrangement = Arrangement.End){
+                    Text(modifier = Modifier.clickable{
+                        passwordState = PasswordGenerator.generateSecurePassword(selectedLength)
+                    }, text = "Generate", textDecoration = TextDecoration.Underline, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                }
+
+
+                Spacer(Modifier.height(20.dp))
+
                 Row(modifier = Modifier.padding(bottom = 10.dp)) {
                     Button(
                         onClick = {
@@ -589,6 +632,36 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
 
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun PasswordLengthChip(value: String = "15", isSelected: Boolean = false, onSelected: (Int) -> Unit = {}){
+    Box(modifier = Modifier
+        .width(40.dp)
+        .height(25.dp)
+        .background(
+            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+            shape = RoundedCornerShape(20.dp)
+        )
+        .border(
+            width = 1.dp,
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.secondary
+        )
+        .clickable {
+            onSelected(value.toInt())
+        },
+        contentAlignment = Alignment.Center
+    ){
+        Text(
+            text = value,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(0.dp)
+        )
     }
 }
 
@@ -740,4 +813,13 @@ fun PasswordsListPreview() {
         PasswordMap(websiteUrl = "test2", websiteName =  "test2", username = "test", password = "test"),
         PasswordMap(websiteUrl = "test3", websiteName =  "test3", username = "test", password = "test")    )
     )
+}
+
+
+
+fun Context.copyToClipboard(label: String, text: CharSequence) {
+    val clipboardManager = ContextCompat.getSystemService(this, ClipboardManager::class.java)
+    val clip = ClipData.newPlainText(label, text)
+    clipboardManager?.setPrimaryClip(clip)
+    Toast.makeText(this, "Copied $label to clipboard", Toast.LENGTH_SHORT).show()
 }
