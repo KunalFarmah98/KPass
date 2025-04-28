@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.Packaging
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
@@ -24,6 +25,12 @@ android {
         buildConfigField("String","KEY_MASTER", keyMaster)
     }
 
+    sourceSets {
+        getByName("main").res.srcDirs("src/main/res")
+        getByName("debug").res.srcDirs("src/debug/res")
+    }
+
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -33,6 +40,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
