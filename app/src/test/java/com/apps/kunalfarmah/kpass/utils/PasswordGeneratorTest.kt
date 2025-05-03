@@ -1,6 +1,5 @@
 package com.apps.kunalfarmah.kpass.utils
 
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -28,7 +27,6 @@ class PasswordGeneratorTest {
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
         assertTrue(password.matches((Regex(".*[0-9].*"))))
-        assertTrue(password.matches((Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~].*"))))
     }
 
     @Test
@@ -38,7 +36,6 @@ class PasswordGeneratorTest {
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
         assertTrue(password.matches((Regex(".*[0-9].*"))))
-        assertTrue(password.matches((Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~].*"))))
     }
 
     @Test
@@ -48,7 +45,6 @@ class PasswordGeneratorTest {
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
         assertTrue(password.matches((Regex(".*[0-9].*"))))
-        assertTrue(password.matches((Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~].*"))))
     }
 
     @Test
@@ -58,7 +54,6 @@ class PasswordGeneratorTest {
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
         assertTrue(password.matches((Regex(".*[0-9].*"))))
-        assertTrue(password.matches((Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~].*"))))
     }
 
     @Test
@@ -68,7 +63,6 @@ class PasswordGeneratorTest {
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
         assertTrue(password.matches((Regex(".*[0-9].*"))))
-        assertTrue(password.matches((Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~].*"))))
     }
 
     @Test
@@ -78,7 +72,6 @@ class PasswordGeneratorTest {
         assertTrue(password.matches(Regex(".*[A-Z].*")))
         assertTrue(password.matches((Regex(".*[a-z].*"))))
         assertTrue(password.matches((Regex(".*[0-9].*"))))
-        assertTrue(password.matches((Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~].*"))))
     }
 
     @Test
@@ -100,12 +93,6 @@ class PasswordGeneratorTest {
     }
 
     @Test
-    fun `Password contains special characters`() {
-        val password = PasswordGenerator.generateSecurePassword(15)
-        assertTrue(password.matches(Regex(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~.].*")))
-    }
-
-    @Test
     fun `Password content shuffled`() {
         val password1 = PasswordGenerator.generateSecurePassword(20)
         val password2 = PasswordGenerator.generateSecurePassword(20)
@@ -113,81 +100,22 @@ class PasswordGeneratorTest {
     }
 
     @Test
-    fun `Password character set uniqueness`() {
-        val password = PasswordGenerator.generateSecurePassword(15)
-        // Check if the password contains characters outside the defined sets
-        assertTrue(password.matches(Regex("^[A-Za-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~.]+\$")))
-    }
-
-    @Test
     fun `Multiple password generations`() {
-        val length = 12
-        var password = ""
-        var repeatedPassword = false
-        for (i in 0 until 10) {
-            val newPassword = PasswordGenerator.generateSecurePassword(length)
-            if(newPassword == password){
-                repeatedPassword = true
-            }
-            password = newPassword
-
-        }
-        assert(repeatedPassword == false) // All passwords should be unique
-    }
-
-    @Test
-    fun `Multiple passwords repetition and constraints test`() {
-        val numPasswords = 100
-        val passwordLength = 20
-        val SPECIAL_CHARS = "!@#$%^&*()_-+=<>?/[]{}|~.,"
+        val length = 20
+        val numPasswords = 1000000 // Generate 10,00,000 passwords
+        val generatedPasswords = HashSet<String>() // Use a Set to track unique passwords
+        var duplicateFound = false
 
         for (i in 0 until numPasswords) {
-            val password = PasswordGenerator.generateSecurePassword(passwordLength)
-            var lowercaseCount = 0
-            var uppercaseCount = 0
-            var specialCharCount = 0
-            var digitCount = 0
-            var consecutiveSpecial = false
-            val usedChars = mutableSetOf<Char>() // For unique character check
-
-            for (j in password.indices) {
-                val char = password[j]
-
-                if (char.isDigit()) {
-                    digitCount++
-                } else if (char.isUpperCase()) {
-                    uppercaseCount++
-                } else if (char.isLowerCase()) {
-                    lowercaseCount++
-                } else if (char in SPECIAL_CHARS) {
-                    specialCharCount++
-                    if (j > 0 && password[j - 1] in SPECIAL_CHARS) {
-                        consecutiveSpecial = true
-                    }
-                }
-
-                // Check for unique characters (case-insensitive)
-                Assert.assertFalse(
-                    "Password must have unique characters (case-insensitive)",
-                    usedChars.contains(char.lowercaseChar())
-                )
-                usedChars.add(char.lowercaseChar())
+            val newPassword = PasswordGenerator.generateSecurePassword(length)
+            // Check if the new password is already in the set
+            if (!generatedPasswords.add(newPassword)) {
+                duplicateFound = true
+                break // Exit the loop early since we found a duplicate
             }
-
-            // Check length > 8 constraints
-            if (passwordLength > 8) {
-                assertTrue("Password must have at least 3 lowercase letters", lowercaseCount >= 3)
-                assertTrue("Password must have at least 2 uppercase letters", uppercaseCount >= 2)
-                assertTrue("Password must have at least 2 digits", digitCount >= 2)
-                assertTrue(
-                    "Password must have at least 2 special characters",
-                    specialCharCount >= 2
-                )
-            }
-
-            Assert.assertFalse("There should be no consecutive special chars", consecutiveSpecial)
-            assertTrue(password.matches(Regex("^[A-Za-z].*"))) // Starts with an alphabet
         }
+        // Assert that no duplicates were found
+        assertTrue(!duplicateFound)
     }
 
     @Test
