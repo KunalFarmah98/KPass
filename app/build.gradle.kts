@@ -16,8 +16,8 @@ android {
         applicationId = "com.apps.kunalfarmah.kpass"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.0.5"
+        versionCode = 6
+        versionName = "1.0.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String","KEY_MASTER", gradleLocalProperties(rootDir, providers).getProperty("KEY_MASTER"))
         buildConfigField("String","LOWERCASE_POOL", gradleLocalProperties(rootDir, providers).getProperty("LOWERCASE"))
@@ -29,7 +29,6 @@ android {
         buildConfigField("Integer","MIN_SPECIAL", gradleLocalProperties(rootDir, providers).getProperty("MIN_SPECIAL"))
         buildConfigField("Integer","MIN_DIGITS", gradleLocalProperties(rootDir, providers).getProperty("MIN_DIGITS"))
         buildConfigField("Integer","MANDATORY_CHARS", gradleLocalProperties(rootDir, providers).getProperty("MANDATORY_CHARS"))
-
     }
 
     sourceSets {
