@@ -1,3 +1,4 @@
+import com.apps.kunalfarmah.kpass.BuildConfig
 import java.security.SecureRandom
 
 object PasswordGenerator {
@@ -5,10 +6,10 @@ object PasswordGenerator {
     val availablePasswordLengths = listOf<Int>(8, 15, 20, 25, 30)
 
     fun generateSecurePassword(length: Int): String {
-        val lowerPool = "abcdefghijklmnopqrstuvwxyz"
-        val upperPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        val digitsPool = "0123456789"
-        val specialPool = "!@#$%^&*()"
+        val lowerPool = BuildConfig.LOWERCASE_POOL
+        val upperPool = BuildConfig.UPPERCASE_POOL
+        val digitsPool = BuildConfig.DIGITS_POOL
+        val specialPool = BuildConfig.SPECIAL_POOL
 
         // Maximum unique characters available:
         val maxUnique = 26 + digitsPool.length + specialPool.length  // 26 letters (ignoring case) + 10 digits + 10 specials = 46
@@ -58,11 +59,11 @@ object PasswordGenerator {
         // Gather candidates according to the required constraints.
         if (length > 8) {
             // Add the mandatory counts.
-            addLetter(lowerPool, 3)    // 3 lowercase letters.
-            addLetter(upperPool, 2)    // 2 uppercase letters.
-            addDigit(2)                // 2 digits.
-            addSpecial(2)              // 2 special characters.
-            val mandatoryCount = 9
+            addLetter(lowerPool, BuildConfig.MIN_LOWER)
+            addLetter(upperPool, BuildConfig.MIN_UPPER)
+            addDigit(BuildConfig.MIN_DIGITS)
+            addSpecial(BuildConfig.MIN_SPECIAL)
+            val mandatoryCount = BuildConfig.MANDATORY_CHARS
             val extraCount = length - mandatoryCount
 
             // Add extra characters one by one from any pool while ensuring uniqueness.

@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.Packaging
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
@@ -7,8 +6,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
 }
-
-val keyMaster: String = gradleLocalProperties(rootDir, providers).getProperty("KEY_MASTER")
 
 
 android {
@@ -22,7 +19,17 @@ android {
         versionCode = 5
         versionName = "1.0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String","KEY_MASTER", keyMaster)
+        buildConfigField("String","KEY_MASTER", gradleLocalProperties(rootDir, providers).getProperty("KEY_MASTER"))
+        buildConfigField("String","LOWERCASE_POOL", gradleLocalProperties(rootDir, providers).getProperty("LOWERCASE"))
+        buildConfigField("String","UPPERCASE_POOL", gradleLocalProperties(rootDir, providers).getProperty("UPPERCASE"))
+        buildConfigField("String","SPECIAL_POOL", gradleLocalProperties(rootDir, providers).getProperty("SPECIAL"))
+        buildConfigField("String","DIGITS_POOL", gradleLocalProperties(rootDir, providers).getProperty("DIGITS"))
+        buildConfigField("Integer","MIN_LOWER", gradleLocalProperties(rootDir, providers).getProperty("MIN_LOWER"))
+        buildConfigField("Integer","MIN_UPPER", gradleLocalProperties(rootDir, providers).getProperty("MIN_UPPER"))
+        buildConfigField("Integer","MIN_SPECIAL", gradleLocalProperties(rootDir, providers).getProperty("MIN_SPECIAL"))
+        buildConfigField("Integer","MIN_DIGITS", gradleLocalProperties(rootDir, providers).getProperty("MIN_DIGITS"))
+        buildConfigField("Integer","MANDATORY_CHARS", gradleLocalProperties(rootDir, providers).getProperty("MANDATORY_CHARS"))
+
     }
 
     sourceSets {
