@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.work.manager)
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit)

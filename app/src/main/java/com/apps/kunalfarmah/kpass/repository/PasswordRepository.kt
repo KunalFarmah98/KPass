@@ -28,6 +28,10 @@ class PasswordRepository(private val passwordMapDao: PasswordMapDao){
         return passwordMapDao.getAllPasswords()
     }
 
+    suspend fun getAllOldPasswords(): List<PasswordMap>{
+        return passwordMapDao.getAllOldPasswords()
+    }
+
     suspend fun deletePassword(id: String){
         passwordMapDao.deletePassword(id)
     }

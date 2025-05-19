@@ -49,6 +49,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
@@ -57,11 +59,13 @@ import com.apps.kunalfarmah.kpass.ui.components.AddPassword
 import com.apps.kunalfarmah.kpass.ui.components.ConfirmationDialog
 import com.apps.kunalfarmah.kpass.ui.components.EnterPassword
 import com.apps.kunalfarmah.kpass.ui.components.HomeScreen
+import com.apps.kunalfarmah.kpass.ui.components.NotificationPermissionRequester
 import com.apps.kunalfarmah.kpass.ui.components.OptionsMenu
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
+import com.apps.kunalfarmah.kpass.worker.UpdatePasswordWorker
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -72,6 +76,8 @@ class MainActivity : AppCompatActivity() {
     private val mainViewModel: PasswordViewModel by viewModel()
 
     private lateinit var createFileLauncher: ActivityResultLauncher<String>
+
+    private lateinit var workManager: WorkManager
 
 
     private val promptManager by lazy {
@@ -103,6 +109,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        workManager = WorkManager.getInstance(this)
+        mainViewModel.getAllEnqueuedWork(workManager)
         PreferencesManager.context  = this
         createFileLauncher = registerForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf")
@@ -132,6 +140,15 @@ class MainActivity : AppCompatActivity() {
                     derivedStateOf {
                         enterPassword || changePassword || deleteAllPasswords
                     }
+                }
+                val isWorkEnqueued by mainViewModel.enqueuedWork.collectAsState()
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    NotificationPermissionRequester()
+                }
+                // if no task is scheduled, schedule it
+                if(isWorkEnqueued == false){
+                    workManager.enqueue(PeriodicWorkRequest.Builder(UpdatePasswordWorker::class.java, 7, java.util.concurrent.TimeUnit.DAYS).build())
                 }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
