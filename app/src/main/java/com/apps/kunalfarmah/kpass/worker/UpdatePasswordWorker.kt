@@ -38,7 +38,16 @@ class UpdatePasswordWorker(val context: Context, workerParams: WorkerParameters,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     notificationService.createNotificationChannel(channel!!)
                 }
-                if(ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.POST_NOTIFICATIONS
+                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationService.notify(1, notification)
+                    }
+                }
+                else{
                     notificationService.notify(1, notification)
                 }
             }
