@@ -74,8 +74,9 @@ fun MainScreen(modifier: Modifier) {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (state: Boolean) -> Unit = {}) {
+fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, showOldPasswords: Boolean ?= false, setFabState: (state: Boolean) -> Unit = {}) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
+    val oldPasswords by viewModel.oldPasswords.collectAsStateWithLifecycle()
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
 
     var openAddPasswordDialog by rememberSaveable {
@@ -89,6 +90,9 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
     }
     var openPasswordDetailsDialog  by rememberSaveable {
         mutableStateOf(false)
+    }
+    var updateOldPasswords by rememberSaveable {
+        mutableStateOf(showOldPasswords == true)
     }
 
     var addedItemIndex by rememberSaveable {
@@ -122,6 +126,13 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                     openPasswordDetailsDialog = dialogState.show
                 }
             }
+        }
+    }
+
+    LaunchedEffect(showOldPasswords) {
+        if(showOldPasswords == true){
+            updateOldPasswords = true
+            viewModel.getAllOldPasswords()
         }
     }
 
@@ -166,12 +177,19 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                SearchPassword(onSearch = {query ->
-                    viewModel.search(query)
-                }, enabled = !isDialogOpen)
+                if(!updateOldPasswords) {
+                    SearchPassword(onSearch = { query ->
+                        viewModel.search(query)
+                    }, enabled = !isDialogOpen)
+                }
+                else{
+                    Button(onClick = {updateOldPasswords = false}) {
+                        Text("Confirm Updating Old Passwords")
+                    }
+                }
                 PasswordsList(
                     state = listState,
-                    passwords = (passwords as DataModel.Success).data,
+                    passwords = if(updateOldPasswords) (oldPasswords as DataModel.Success).data else (passwords as DataModel.Success).data,
                     onCopyClick = { data: PasswordMap ->
                         context.copyToClipboard(label = "password", CryptoManager.decrypt(data.password))
                     },

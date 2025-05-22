@@ -317,6 +317,8 @@ fun PasswordItem(
 fun ConfirmationDialog(
     title: String = "title",
     body: String = "body",
+    positiveCta: String = "Confirm",
+    negativeCta: String = "Cancel",
     onPositiveClick: () -> Unit = {},
     onNegativeClick: () -> Unit = {}
 ) {
@@ -357,11 +359,11 @@ fun ConfirmationDialog(
 
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(modifier = Modifier.width(100.dp), onClick = onPositiveClick) {
-                        Text(stringResource(R.string.confirm))
+                        Text(positiveCta)
                     }
                     Spacer(Modifier.width(25.dp))
                     Button(modifier = Modifier.width(100.dp), onClick = onNegativeClick) {
-                        Text(stringResource(R.string.cancel))
+                        Text(negativeCta)
                     }
                 }
             }

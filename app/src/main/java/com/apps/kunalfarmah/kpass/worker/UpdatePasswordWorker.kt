@@ -16,10 +16,10 @@ import com.apps.kunalfarmah.kpass.ui.activity.MainActivity
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
 import kotlinx.coroutines.flow.collectLatest
 
-class UpdatePasswordWorker(val context: Context, val workerParams: WorkerParameters, val viewModel: PasswordViewModel) : CoroutineWorker(context, workerParams) {
+class UpdatePasswordWorker(val context: Context, workerParams: WorkerParameters, private val viewModel: PasswordViewModel) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         viewModel.getAllOldPasswords()
-        viewModel.passwords.collectLatest {
+        viewModel.oldPasswords.collectLatest {
             if(it is DataModel.Success && it.data.isNotEmpty()){
                 val channel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     NotificationChannel("password_update", "Password Update", NotificationManager.IMPORTANCE_DEFAULT)
@@ -28,6 +28,7 @@ class UpdatePasswordWorker(val context: Context, val workerParams: WorkerParamet
                 }
                 val intent = Intent(context, MainActivity::class.java)
                 intent.putExtra(Constants.UPDATE_PASSWORDS, true)
+                intent.putExtra(Constants.OLD_PASSWORDS_COUNT, it.data.size)
                 val notification = NotificationCompat.Builder(context, "password_update")
                     .setContentTitle("Update Older Passwords")
                     .setContentText("You have ${it.data.size} passwords older than 3 Months. It is recommended to update these passwords")

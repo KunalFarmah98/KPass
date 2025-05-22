@@ -12,19 +12,20 @@ import com.apps.kunalfarmah.kpass.model.DialogModel
 import com.apps.kunalfarmah.kpass.repository.PasswordRepository
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class PasswordViewModel(private val passwordRepository: PasswordRepository): ViewModel() {
 
     private val _passwords = MutableStateFlow<DataModel<List<PasswordMap>>>(DataModel.Loading())
     val passwords = _passwords.asStateFlow()
+
+    private val _oldPasswords = MutableStateFlow<DataModel<List<PasswordMap>>>(DataModel.Loading())
+    val oldPasswords = _passwords.asStateFlow()
 
     private val _dialogController = MutableSharedFlow<DialogModel<Boolean>>()
     val dialogController = _dialogController.asSharedFlow()
@@ -127,7 +128,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
 
     fun getAllOldPasswords(){
         viewModelScope.launch(Dispatchers.IO) {
-            _passwords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
+            _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
         }
     }
 

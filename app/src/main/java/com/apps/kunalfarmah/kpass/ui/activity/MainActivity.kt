@@ -52,6 +52,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.apps.kunalfarmah.kpass.R
+import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -136,12 +137,21 @@ class MainActivity : AppCompatActivity() {
                 var deleteAllPasswords by rememberSaveable {
                     mutableStateOf(false)
                 }
+                var showOldPasswords by rememberSaveable {
+                    mutableStateOf(false)
+                }
                 val isDialogOpen by remember {
                     derivedStateOf {
                         enterPassword || changePassword || deleteAllPasswords
                     }
                 }
                 val isWorkEnqueued by mainViewModel.enqueuedWork.collectAsState()
+                val updateOldPasswords by remember {
+                    mutableStateOf(intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false))
+                }
+                val oldPasswordsCount by remember {
+                    mutableStateOf(intent.extras?.getInt(Constants.OLD_PASSWORDS_COUNT,0))
+                }
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     NotificationPermissionRequester()
@@ -287,7 +297,19 @@ class MainActivity : AppCompatActivity() {
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
                                 HomeScreen(Modifier
                                     .padding(innerPadding)
-                                    .blur(if (isDialogOpen) 2.dp else 0.dp), mainViewModel)
+                                    .blur(if (isDialogOpen) 2.dp else 0.dp), mainViewModel, showOldPasswords)
+                                if(updateOldPasswords == true){
+                                    ConfirmationDialog(
+                                        title = stringResource(R.string.password_age_alert_title),
+                                        body = "You have ${oldPasswordsCount} passwords older than 3 Months. It is recommended to update these passwords",
+                                        onNegativeClick = {
+                                            showOldPasswords = false
+                                        },
+                                        onPositiveClick = {
+                                            showOldPasswords = true
+                                        }
+                                    )
+                                }
                                 if(enterPassword || changePassword){
                                     EnterPassword(onClose = {
                                         enterPassword = false

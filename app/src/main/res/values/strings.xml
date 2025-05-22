@@ -21,4 +21,7 @@
     <string name="unlock_app">Unlock App</string>
     <string name="please_use_your_fingerprint_or_screen_lock_to_unlock_the_app">Please use your fingerprint or screen lock to unlock the app</string>
     <string name="please_select_the_location_for_the_export">Please select the location for the export</string>
+    <string name="password_age_alert_title">Update old passwords</string>
+    <string name="continue_button">Update\n</string>
+    <string name="remind_me_later_button">Remind me later\n</string>
 </resources>
