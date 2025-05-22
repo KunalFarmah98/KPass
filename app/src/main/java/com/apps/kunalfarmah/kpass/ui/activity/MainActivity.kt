@@ -49,6 +49,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.apps.kunalfarmah.kpass.R
@@ -158,7 +160,17 @@ class MainActivity : AppCompatActivity() {
                 }
                 // if no task is scheduled, schedule it
                 if(isWorkEnqueued == false){
-                    workManager.enqueue(PeriodicWorkRequest.Builder(UpdatePasswordWorker::class.java, 7, java.util.concurrent.TimeUnit.DAYS).build())
+                    workManager.enqueue(
+                        PeriodicWorkRequest.Builder(
+                            UpdatePasswordWorker::class.java, 7, java.util.concurrent.TimeUnit.DAYS)
+                            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.MINUTES)
+                            .setConstraints(
+                                Constraints.Builder()
+                                    .setRequiresBatteryNotLow(true)
+                                    .build()
+                            )
+                            .build()
+                    )
                 }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
