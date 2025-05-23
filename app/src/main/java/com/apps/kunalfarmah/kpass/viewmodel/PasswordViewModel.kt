@@ -25,7 +25,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     val passwords = _passwords.asStateFlow()
 
     private val _oldPasswords = MutableStateFlow<DataModel<List<PasswordMap>>>(DataModel.Loading())
-    val oldPasswords = _passwords.asStateFlow()
+    val oldPasswords = _oldPasswords.asStateFlow()
 
     private val _dialogController = MutableSharedFlow<DialogModel<Boolean>>()
     val dialogController = _dialogController.asSharedFlow()
@@ -128,7 +128,13 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
 
     fun getAllOldPasswords(){
         viewModelScope.launch(Dispatchers.IO) {
-            _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
+            val list = passwordRepository.getAllOldPasswords()
+            if(list.isNotEmpty()) {
+                _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
+            }
+            else{
+                _oldPasswords.value = DataModel.Error("No old passwords found")
+            }
         }
     }
 
