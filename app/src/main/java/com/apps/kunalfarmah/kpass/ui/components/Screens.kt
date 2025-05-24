@@ -74,7 +74,7 @@ fun MainScreen(modifier: Modifier) {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePasswords: Boolean ?= false, setFabState: (state: Boolean) -> Unit = {}) {
+fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePasswords: Boolean ?= false, isUpdatePasswordDialogOpen: Boolean = false, setFabState: (state: Boolean) -> Unit = {}) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
     val oldPasswords by viewModel.oldPasswords.collectAsStateWithLifecycle()
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
@@ -95,6 +95,10 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
         mutableStateOf(shouldUpdatePasswords == true)
     }
 
+    var openUpdatePasswordDialog by rememberSaveable {
+        mutableStateOf(isUpdatePasswordDialogOpen)
+    }
+
     var addedItemIndex by rememberSaveable {
         mutableIntStateOf(-1)
     }
@@ -105,7 +109,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
 
     val isDialogOpen by remember {
         derivedStateOf {
-            openAddPasswordDialog || openEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog
+            openAddPasswordDialog || openEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog || openUpdatePasswordDialog
         }
     }
 
@@ -133,6 +137,10 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
         if(shouldUpdatePasswords == true){
             updateOldPasswords = true
         }
+    }
+
+    LaunchedEffect(isUpdatePasswordDialogOpen) {
+        openUpdatePasswordDialog = isUpdatePasswordDialogOpen
     }
 
     LaunchedEffect(isDialogOpen, updateOldPasswords) {

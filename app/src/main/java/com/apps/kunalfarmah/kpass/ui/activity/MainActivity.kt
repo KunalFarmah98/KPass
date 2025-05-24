@@ -189,7 +189,6 @@ class MainActivity : AppCompatActivity() {
 //                        )
 //                            .setInitialDelay(10, TimeUnit.SECONDS)
 //                            .build()
-//
 //                    )
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -330,7 +329,8 @@ class MainActivity : AppCompatActivity() {
                                     .padding(innerPadding)
                                     .blur(if (isDialogOpen) 2.dp else 0.dp),
                                     mainViewModel,
-                                    showOldPasswords
+                                    showOldPasswords,
+                                    showUpdatePasswordDialog
                                 ){ enabled ->
                                     allowEnterPassword = enabled
                                 }
