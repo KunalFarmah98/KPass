@@ -51,6 +51,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.apps.kunalfarmah.kpass.R
@@ -72,6 +73,7 @@ import com.apps.kunalfarmah.kpass.worker.UpdatePasswordWorker
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -115,6 +117,9 @@ class MainActivity : AppCompatActivity() {
         workManager = WorkManager.getInstance(this)
         mainViewModel.getAllEnqueuedWork(workManager)
         PreferencesManager.context  = this
+        intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false)?.let{
+            mainViewModel.getAllOldPasswords()
+        }
         createFileLauncher = registerForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri: Uri? ->
@@ -142,18 +147,23 @@ class MainActivity : AppCompatActivity() {
                 var showOldPasswords by rememberSaveable {
                     mutableStateOf(false)
                 }
-                val isDialogOpen by remember {
-                    derivedStateOf {
-                        enterPassword || changePassword || deleteAllPasswords
-                    }
-                }
-                val isWorkEnqueued by mainViewModel.enqueuedWork.collectAsState()
-                val updateOldPasswords by remember {
-                    mutableStateOf(intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false))
+                var showUpdatePasswordDialog by remember {
+                    mutableStateOf(intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false) == true)
                 }
                 val oldPasswordsCount by remember {
                     mutableStateOf(intent.extras?.getInt(Constants.OLD_PASSWORDS_COUNT,0))
                 }
+                val isDialogOpen by remember {
+                    derivedStateOf {
+                        enterPassword || changePassword || deleteAllPasswords || showUpdatePasswordDialog
+                    }
+                }
+                var allowEnterPassword by remember {
+                    mutableStateOf(!isDialogOpen && !showUpdatePasswordDialog)
+                }
+                val isWorkEnqueued by mainViewModel.enqueuedWork.collectAsState()
+
+
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     NotificationPermissionRequester()
@@ -172,6 +182,15 @@ class MainActivity : AppCompatActivity() {
                             .build()
                     )
                 }
+//                    workManager.cancelAllWork()
+//                    workManager.enqueue(
+//                        OneTimeWorkRequest.Builder(
+//                            UpdatePasswordWorker::class.java
+//                        )
+//                            .setInitialDelay(10, TimeUnit.SECONDS)
+//                            .build()
+//
+//                    )
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
@@ -242,7 +261,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                     },
-                    floatingActionButton = { AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
+                    floatingActionButton = { if(allowEnterPassword) AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
                     var biometricResult by remember {
@@ -309,16 +328,28 @@ class MainActivity : AppCompatActivity() {
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
                                 HomeScreen(Modifier
                                     .padding(innerPadding)
-                                    .blur(if (isDialogOpen) 2.dp else 0.dp), mainViewModel, showOldPasswords)
-                                if(updateOldPasswords == true){
+                                    .blur(if (isDialogOpen) 2.dp else 0.dp),
+                                    mainViewModel,
+                                    showOldPasswords
+                                ){ enabled ->
+                                    allowEnterPassword = enabled
+                                }
+                                if(showUpdatePasswordDialog == true){
+                                    allowEnterPassword = false
                                     ConfirmationDialog(
                                         title = stringResource(R.string.password_age_alert_title),
-                                        body = "You have $oldPasswordsCount passwords older than 3 Months. It is recommended to update these passwords",
+                                        body = "You have $oldPasswordsCount passwords older than 3 Months. To ensure security of your account, " +
+                                                "it is recommended to update your passwords every 3 months.\nOnce you click confirm, " +
+                                                "you can see what passwords you need to update and you can update the once you want",
                                         onNegativeClick = {
+                                            showUpdatePasswordDialog = false
                                             showOldPasswords = false
+                                            allowEnterPassword = true
                                         },
                                         onPositiveClick = {
+                                            showUpdatePasswordDialog = false
                                             showOldPasswords = true
+                                            allowEnterPassword = true
                                         }
                                     )
                                 }

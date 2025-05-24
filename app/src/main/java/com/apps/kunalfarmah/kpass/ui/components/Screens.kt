@@ -74,7 +74,7 @@ fun MainScreen(modifier: Modifier) {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, showOldPasswords: Boolean ?= false, setFabState: (state: Boolean) -> Unit = {}) {
+fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePasswords: Boolean ?= false, setFabState: (state: Boolean) -> Unit = {}) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
     val oldPasswords by viewModel.oldPasswords.collectAsStateWithLifecycle()
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
@@ -92,7 +92,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, showOldPassword
         mutableStateOf(false)
     }
     var updateOldPasswords by rememberSaveable {
-        mutableStateOf(showOldPasswords == true)
+        mutableStateOf(shouldUpdatePasswords == true)
     }
 
     var addedItemIndex by rememberSaveable {
@@ -129,15 +129,14 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, showOldPassword
         }
     }
 
-    LaunchedEffect(showOldPasswords) {
-        if(showOldPasswords == true){
+    LaunchedEffect(shouldUpdatePasswords) {
+        if(shouldUpdatePasswords == true){
             updateOldPasswords = true
-            viewModel.getAllOldPasswords()
         }
     }
 
-    LaunchedEffect(isDialogOpen) {
-        setFabState(!isDialogOpen)
+    LaunchedEffect(isDialogOpen, updateOldPasswords) {
+        setFabState(!isDialogOpen && updateOldPasswords != true)
     }
 
     LaunchedEffect(addedItemIndex){
@@ -183,7 +182,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, showOldPassword
                     }, enabled = !isDialogOpen)
                 }
                 else{
-                    Button(onClick = {updateOldPasswords = false}) {
+                    Button(modifier = Modifier.padding(top = 10.dp), onClick = {updateOldPasswords = false}) {
                         Text("Confirm Updating Old Passwords")
                     }
                 }
