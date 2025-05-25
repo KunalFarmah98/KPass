@@ -117,6 +117,9 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
             if(!isUpdate){
                 onItemAdded(passwords.indexOfFirst { it.id == id })
             }
+            else{
+                _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
+            }
         }
     }
 
