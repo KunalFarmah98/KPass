@@ -4,14 +4,18 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
+import java.util.concurrent.TimeUnit
 
 @Dao()
 interface PasswordMapDao {
 
+    @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPassword(passwordMap: PasswordMap)
 
+    @Transaction
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updatePassword(passwordMap: PasswordMap)
 
@@ -19,7 +23,7 @@ interface PasswordMapDao {
     suspend fun getAllPasswords(): List<PasswordMap>
 
     @Query("SELECT * FROM passwordmap WHERE lastModified < :time ORDER BY websiteName COLLATE NOCASE ASC")
-    suspend fun getAllOldPasswords(time: Long = System.currentTimeMillis() - 90*24*60*60*1000): List<PasswordMap>
+    suspend fun getAllOldPasswords(time: Long = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(90)): List<PasswordMap>
 
     @Query("DELETE FROM passwordmap WHERE id = :id")
     suspend fun deletePassword(id: String)
