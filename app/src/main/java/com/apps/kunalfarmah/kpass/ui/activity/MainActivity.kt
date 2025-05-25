@@ -161,27 +161,36 @@ class MainActivity : AppCompatActivity() {
                 var allowEnterPassword by remember {
                     mutableStateOf(!isDialogOpen && !showUpdatePasswordDialog)
                 }
-                val isWorkEnqueued by mainViewModel.enqueuedWork.collectAsState()
 
-
+                val enqueuedWork by mainViewModel.enqueuedWork.collectAsState()
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     NotificationPermissionRequester()
                 }
-                // if no task is scheduled, schedule it
-                if(isWorkEnqueued == false){
-                    workManager.enqueue(
-                        PeriodicWorkRequest.Builder(
-                            UpdatePasswordWorker::class.java, 7, java.util.concurrent.TimeUnit.DAYS)
-                            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.MINUTES)
-                            .setConstraints(
-                                Constraints.Builder()
-                                    .setRequiresBatteryNotLow(true)
-                                    .build()
+
+                LaunchedEffect(true) {
+//                  if no task is scheduled, schedule it
+                    if (enqueuedWork == null) {
+                        workManager.cancelAllWork()
+                        Log.e("WorkManager", "Enqueuing new work")
+                        workManager.enqueue(
+                            PeriodicWorkRequest.Builder(
+                                UpdatePasswordWorker::class.java, 7, TimeUnit.DAYS
                             )
-                            .build()
-                    )
+                                .setInitialDelay(2, TimeUnit.HOURS)
+                                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
+                                .setConstraints(
+                                    Constraints.Builder()
+                                        .setRequiresBatteryNotLow(true)
+                                        .build()
+                                )
+                                .build()
+                        )
+                    } else {
+                        Log.e("WorkManager", "work is already queued $enqueuedWork")
+                    }
                 }
+
 //                    workManager.cancelAllWork()
 //                    workManager.enqueue(
 //                        OneTimeWorkRequest.Builder(

@@ -33,7 +33,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     private val _currentItem = MutableStateFlow<PasswordMap?>(null)
     val currentItem = _currentItem.asStateFlow()
 
-    private val _enqueuedWork = MutableStateFlow<Boolean>(false)
+    private val _enqueuedWork = MutableStateFlow<WorkInfo?>(null)
     val enqueuedWork = _enqueuedWork.asStateFlow()
 
     /**
@@ -49,7 +49,7 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
             .build()
         viewModelScope.launch {
             workManager.getWorkInfosFlow(workQuery).collectLatest {
-                _enqueuedWork.value = (it.firstOrNull() != null)
+                _enqueuedWork.value = (it.firstOrNull())
             }
         }
     }
