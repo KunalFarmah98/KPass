@@ -50,6 +50,7 @@ class UpdatePasswordWorker(val context: Context, workerParams: WorkerParameters,
                         )
                     )
                     .setSmallIcon(R.drawable.ic_notification)
+                    .setAutoCancel(true)
                     .build()
                 val notificationService =
                     context.getSystemService(NotificationManager::class.java) as NotificationManager
