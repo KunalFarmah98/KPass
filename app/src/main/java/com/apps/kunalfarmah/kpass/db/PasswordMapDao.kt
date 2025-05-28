@@ -22,7 +22,7 @@ interface PasswordMapDao {
     @Query("SELECT * FROM passwordmap ORDER BY websiteName COLLATE NOCASE ASC")
     suspend fun getAllPasswords(): List<PasswordMap>
 
-    @Query("SELECT * FROM passwordmap WHERE lastModified < :time ORDER BY websiteName COLLATE NOCASE ASC")
+    @Query("SELECT * FROM passwordmap WHERE lastModified < :time AND isIgnored = 0 ORDER BY websiteName COLLATE NOCASE ASC")
     suspend fun getAllOldPasswords(time: Long = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(90)): List<PasswordMap>
 
     @Query("DELETE FROM passwordmap WHERE id = :id")

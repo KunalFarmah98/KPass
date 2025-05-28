@@ -53,6 +53,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -165,10 +166,12 @@ fun AlphabeticalScrollbar(
 @Composable
 fun PasswordsList(
     state: LazyListState = rememberLazyListState(),
+    arePasswordsExpired: Boolean = false,
     passwords: List<PasswordMap>, onItemClick: (data: PasswordMap) -> Unit = {},
     onCopyClick: (data: PasswordMap) -> Unit = {},
     onEditClick: (data: PasswordMap) -> Unit = {},
-    onDeleteClick: (data: PasswordMap) -> Unit = {}
+    onDeleteClick: (data: PasswordMap) -> Unit = {},
+    onIgnoreClick: (data: PasswordMap) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     if (passwords.isEmpty()){
@@ -184,7 +187,7 @@ fun PasswordsList(
                 state = state
             ) {
                 items(items = passwords, key = { it.id }) {
-                    PasswordItem(it, onItemClick, onCopyClick, onEditClick, onDeleteClick)
+                    PasswordItem(it, arePasswordsExpired, onItemClick, onCopyClick, onEditClick, onDeleteClick, onIgnoreClick)
                 }
             }
             AlphabeticalScrollbar(modifier = Modifier.align(Alignment.CenterVertically)) { letter ->
@@ -265,10 +268,12 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
 @Composable
 fun PasswordItem(
     password: PasswordMap,
+    isExpired: Boolean = false,
     onItemClick: (data: PasswordMap) -> Unit = {},
     onCopyClick: (data: PasswordMap) -> Unit = {},
     onEditClick: (data: PasswordMap) -> Unit = {},
-    onDeleteClick: (data: PasswordMap) -> Unit = {}
+    onDeleteClick: (data: PasswordMap) -> Unit = {},
+    onIgnoreClick: (data: PasswordMap) -> Unit = {}
 ) {
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -291,12 +296,32 @@ fun PasswordItem(
                     .weight(1f)
                     .size(18.dp), imageVector = Icons.Filled.Person, contentDescription = "person", tint = Color.Black)
                 Text(modifier = Modifier.weight(6f), text = password.username, maxLines = 2, fontSize = 14.sp)
-                Image(modifier = Modifier
-                    .weight(1f)
-                    .size(18.dp)
-                    .clickable {
-                        onCopyClick(password)
-                    }, painter = painterResource(R.drawable.baseline_content_copy_24), contentDescription = "copy", colorFilter = ColorFilter.tint(Color.Black))
+                if(isExpired){
+                    Image(
+                        modifier = Modifier
+                            .weight(1f)
+                            .size(18.dp)
+                            .clickable {
+                                onIgnoreClick(password)
+                            },
+                        painter = painterResource(R.drawable.baseline_close_24),
+                        contentDescription = "copy",
+                        colorFilter = ColorFilter.tint(Color.Black)
+                    )
+                }
+                else {
+                    Image(
+                        modifier = Modifier
+                            .weight(1f)
+                            .size(18.dp)
+                            .clickable {
+                                onCopyClick(password)
+                            },
+                        painter = painterResource(R.drawable.baseline_content_copy_24),
+                        contentDescription = "copy",
+                        colorFilter = ColorFilter.tint(Color.Black)
+                    )
+                }
                 IconButton(modifier = Modifier
                     .weight(1f)
                     .size(18.dp), onClick = {onEditClick(password)}) {
@@ -460,6 +485,9 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
             if (it.password.isNotEmpty()) pass = CryptoManager.decrypt(it.password)
         }
     }
+    var isIgnored by remember {
+        mutableIntStateOf(if(editing) currentItem?.isIgnored ?: 0 else 0)
+    }
     var websiteNameState by rememberSaveable {
         mutableStateOf(name)
     }
@@ -610,8 +638,19 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                     }, text = "Generate", textDecoration = TextDecoration.Underline, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
 
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, end = 10.dp), horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically){
+                    Checkbox(
+                        checked = isIgnored == 0, onCheckedChange = {
+                            isIgnored = if(it) 0 else 1
+                        })
+                    Text(text = stringResource(R.string.remind_me_to_update_every_3_months), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                }
 
-                Spacer(Modifier.height(20.dp))
+
+                Spacer(Modifier.height(10.dp))
 
                 Row(modifier = Modifier.padding(bottom = 10.dp)) {
                     Button(
@@ -636,7 +675,8 @@ fun AddOrEditPasswordDialog(currentItem: PasswordMap? = null, onAddNewPassword: 
                                     websiteName = websiteNameState,
                                     websiteUrl = websiteUrlState,
                                     username = usernameState,
-                                    password = passwordState
+                                    password = passwordState,
+                                    isIgnored = isIgnored
                                 )
                             )
                         },

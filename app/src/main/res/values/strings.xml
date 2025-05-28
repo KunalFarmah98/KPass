@@ -24,4 +24,7 @@
     <string name="password_age_alert_title">Update old passwords</string>
     <string name="continue_button">Update\n</string>
     <string name="remind_me_later_button">Remind me later\n</string>
+    <string name="stop_receiving_alerts_for_this_password">Stop receiving alerts for this password?</string>
+    <string name="ignore_body">You will no longer be notified to update this password until you update it manually again</string>
+    <string name="remind_me_to_update_every_3_months">Remind me to update every 3 months</string>
 </resources>

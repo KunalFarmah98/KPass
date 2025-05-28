@@ -27,7 +27,9 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
+import com.apps.kunalfarmah.kpass.model.ConfirmationDialogContent
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.model.DialogModel
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -103,6 +105,10 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
         mutableIntStateOf(-1)
     }
 
+    var confirmationDialogContent by rememberSaveable {
+        mutableStateOf<ConfirmationDialogContent?>(null)
+    }
+
     val context = LocalContext.current
 
     val listState = rememberLazyListState()
@@ -125,6 +131,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
                 }
                 is DialogModel.ConfirmationDialog -> {
                     openConfirmationDialog = dialogState.show
+                    confirmationDialogContent = dialogState.content
                 }
                 is DialogModel.DetailsDialog -> {
                     openPasswordDetailsDialog = dialogState.show
@@ -190,13 +197,17 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
                     }, enabled = !isDialogOpen)
                 }
                 else{
-                    Button(modifier = Modifier.padding(top = 10.dp), onClick = {updateOldPasswords = false}) {
+                    Button(modifier = Modifier.padding(top = 10.dp), onClick = {
+                        viewModel.getAllPasswords()
+                        updateOldPasswords = false
+                    }) {
                         Text("Confirm Updating Old Passwords")
                     }
                 }
                 PasswordsList(
                     state = listState,
                     passwords = if(updateOldPasswords) (oldPasswords as DataModel.Success).data else (passwords as DataModel.Success).data,
+                    arePasswordsExpired = updateOldPasswords,
                     onCopyClick = { data: PasswordMap ->
                         context.copyToClipboard(label = "password", CryptoManager.decrypt(data.password))
                     },
@@ -211,6 +222,22 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
                     onItemClick = { data: PasswordMap ->
                         if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openPasswordDetailDialog(data)
+                    },
+                    onIgnoreClick = { data: PasswordMap ->
+                        viewModel.openConfirmationDialog(
+                            data,
+                            ConfirmationDialogContent(
+                                context.getString(R.string.stop_receiving_alerts_for_this_password),
+                                context.getString(R.string.ignore_body),
+                                onPositiveClick = {
+                                    viewModel.ignorePassword(data)
+                                    viewModel.closeConfirmationDialog()
+                                },
+                                onNegativeClick = {
+                                    viewModel.closeConfirmationDialog()
+                                }
+                            )
+                        )
                     }
                 )
             }
@@ -232,6 +259,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
                     websiteName = data.websiteName,
                     username = data.username,
                     password = data.password,
+                    isIgnored = data.isIgnored,
                     isUpdate = false
                 ){
                     addedItemIndex = it
@@ -254,6 +282,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
                     websiteName = data.websiteName,
                     username = data.username,
                     password = data.password,
+                    isIgnored = data.isIgnored,
                     isUpdate = true
                 )
                 viewModel.closeAddOrEditPasswordDialog(true)
@@ -266,15 +295,15 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
     }
     else if (openConfirmationDialog) {
         ConfirmationDialog(
-            title = "Delete Password",
-            body = "Are you sure you want to delete this password?\nIt can not be recovered again",
-            onPositiveClick = {
+            title = confirmationDialogContent?.title ?: "Delete Password",
+            body = confirmationDialogContent?.body ?: "Are you sure you want to delete this password?\nIt can not be recovered again",
+            onPositiveClick = confirmationDialogContent?.onPositiveClick ?: {
                 if (currentItem != null) {
                     viewModel.deletePassword(currentItem!!.id)
                     viewModel.closeConfirmationDialog()
                 }
             },
-            onNegativeClick = {
+            onNegativeClick = confirmationDialogContent?.onNegativeClick ?: {
                 viewModel.closeConfirmationDialog()
             }
         )

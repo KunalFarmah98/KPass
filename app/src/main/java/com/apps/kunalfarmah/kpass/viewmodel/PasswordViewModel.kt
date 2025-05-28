@@ -7,9 +7,11 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.db.PasswordMap
+import com.apps.kunalfarmah.kpass.model.ConfirmationDialogContent
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.model.DialogModel
 import com.apps.kunalfarmah.kpass.repository.PasswordRepository
+import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -80,10 +82,10 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
         _currentItem.value = null
     }
 
-    fun openConfirmationDialog(data: PasswordMap){
+    fun openConfirmationDialog(data: PasswordMap, confirmationDialogContent: ConfirmationDialogContent ?= null){
         _currentItem.value = data
         viewModelScope.launch {
-            _dialogController.emit(DialogModel.ConfirmationDialog(true))
+            _dialogController.emit(DialogModel.ConfirmationDialog(true, confirmationDialogContent))
         }
     }
 
@@ -109,9 +111,17 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
     }
 
 
-    fun insertOrUpdatePassword(id: String = "", websiteName: String, websiteUrl: String?, username: String, password: String, isUpdate: Boolean = false, onItemAdded: (Int) -> Unit = {}){
+    fun insertOrUpdatePassword(id: String = "", websiteName: String, websiteUrl: String?, username: String, password: String, isUpdate: Boolean = false, isIgnored: Int = 0, onItemAdded: (Int) -> Unit = {}){
         viewModelScope.launch(Dispatchers.IO) {
-            passwordRepository.insertOrUpdatePassword(id, websiteName, websiteUrl, username, password, isUpdate)
+            passwordRepository.insertOrUpdatePassword(
+                id = id,
+                websiteName = websiteName,
+                websiteUrl = websiteUrl,
+                username = username,
+                password = password,
+                isIgnored = isIgnored,
+                isUpdate = isUpdate
+            )
             val passwords = passwordRepository.getAllPasswords()
             _passwords.value = DataModel.Success(passwords)
             if(!isUpdate){
@@ -120,6 +130,22 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
             else{
                 _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
             }
+        }
+    }
+
+    fun ignorePassword(password: PasswordMap){
+        viewModelScope.launch(Dispatchers.IO) {
+            passwordRepository.insertOrUpdatePassword(
+                id = password.id,
+                websiteName = password.websiteName,
+                websiteUrl = password.websiteUrl,
+                username = password.username,
+                password = CryptoManager.decrypt(password.password),
+                lastModified = password.lastModified,
+                isIgnored = 1,
+                isUpdate = true
+            )
+            _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
         }
     }
 
