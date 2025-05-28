@@ -201,15 +201,15 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
                         context.copyToClipboard(label = "password", CryptoManager.decrypt(data.password))
                     },
                     onEditClick = { data: PasswordMap ->
-                        if (!isDialogOpen)
+                        if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openAddOrEditPasswordDialog(data, true)
                     },
                     onDeleteClick = { data: PasswordMap ->
-                        if (!isDialogOpen)
+                        if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openConfirmationDialog(data)
                     },
                     onItemClick = { data: PasswordMap ->
-                        if (!isDialogOpen)
+                        if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openPasswordDetailDialog(data)
                     }
                 )
