@@ -146,6 +146,12 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePas
         }
     }
 
+    LaunchedEffect(updateOldPasswords) {
+        if(!updateOldPasswords){
+            listState.scrollToItem(0)
+        }
+    }
+
     LaunchedEffect(isUpdatePasswordDialogOpen) {
         openUpdatePasswordDialog = isUpdatePasswordDialogOpen
     }
