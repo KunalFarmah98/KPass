@@ -59,7 +59,7 @@ fun MainScreen(modifier: Modifier) {
         }) {
             Text("encrypt")
         }
-        SelectionContainer() {
+        SelectionContainer {
             Column {
                 Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
             }

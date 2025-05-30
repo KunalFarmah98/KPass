@@ -30,4 +30,10 @@
     <string name="update_password_dialog_body_2">"it is recommended to update your passwords every 3 months.\nOnce you click confirm, "</string>
     <string name="update_pass_dialog_body_3">you can see what passwords you need to update and you can update the once you want</string>
     <string name="update_pass_dialog_body_1">"You have %1$s passwords older than 3 Months. To ensure security of your accounts, "</string>
+    <string name="notification_permission_denied_toast">Notification permission denied. You will not be able to receive reminders.</string>
+    <string name="notification_permission_required">Notification Permission Required</string>
+    <string name="notification_permission_dialog_content">Please grant the notification permission to receive alerts for passwords older than 90 days.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="no_thanks">No Thanks</string>
+    <string name="notification_permission_is_required_to">Notification permission is required to receive password update reminders.</string>
 </resources>

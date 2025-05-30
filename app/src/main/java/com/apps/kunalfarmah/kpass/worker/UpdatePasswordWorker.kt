@@ -72,7 +72,7 @@ class UpdatePasswordWorker(val context: Context, workerParams: WorkerParameters,
             }
         }
         catch (ignored: NoSuchElementException){
-            Log.e("UpdatePasswordWorker", "No old passwords found")
+            Log.e("UpdatePasswordWorker", "No old passwords found. ${ignored.message}")
             return Result.success()
         }
     }

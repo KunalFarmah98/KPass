@@ -863,41 +863,6 @@ fun TextField(
     )
 }
 
-
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@Composable
-fun NotificationPermissionRequester() {
-    val context = LocalContext.current
-    var hasNotificationPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            hasNotificationPermission = isGranted
-            if (isGranted) {
-                // Permission granted, you can now show notifications
-            } else {
-                // Permission denied, handle accordingly (e.g., show a rationale)
-                // You might want to explain to the user why the permission is needed.
-            }
-        }
-    )
-
-    LaunchedEffect(true) {
-        if(!hasNotificationPermission) {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
-}
-
-
-
 @Preview
 @Composable
 fun PasswordItemPreview() {

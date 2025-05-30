@@ -1,6 +1,10 @@
 package com.apps.kunalfarmah.kpass.ui.activity
 
+import android.Manifest
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import android.net.Uri
 import android.os.Build
@@ -45,6 +49,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -63,7 +68,6 @@ import com.apps.kunalfarmah.kpass.ui.components.AddPassword
 import com.apps.kunalfarmah.kpass.ui.components.ConfirmationDialog
 import com.apps.kunalfarmah.kpass.ui.components.EnterPassword
 import com.apps.kunalfarmah.kpass.ui.components.HomeScreen
-import com.apps.kunalfarmah.kpass.ui.components.NotificationPermissionRequester
 import com.apps.kunalfarmah.kpass.ui.components.OptionsMenu
 import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
@@ -110,13 +114,55 @@ class MainActivity : AppCompatActivity() {
         createFileLauncher.launch("K_Pass_Backup.pdf")
     }
 
+    val permissionLauncher = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("MainActivity", "Notification Permission GRANTED")
+        } else {
+            Log.w("MainActivity", "Notification Permission DENIED")
+            Toast.makeText(this,
+                getString(R.string.notification_permission_is_required_to), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun checkAndRequestNotificationPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+                if(shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)){
+                    AlertDialog.Builder(context)
+                        .setTitle(getString(R.string.notification_permission_required))
+                        .setMessage(getString(R.string.notification_permission_dialog_content))
+                        .setPositiveButton(getString(R.string.grant_permission)) { dialog, _ ->
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                        .setNegativeButton(getString(R.string.no_thanks)) { dialog, _ ->
+                            dialog.cancel()
+                        }
+                        .create()
+                        .show()
+                }
+                else{
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            } else {
+                Log.d("MainActivity", "Notification permission already granted.")
+            }
+        } else {
+            Log.d("MainActivity", "Notification permission not required before Android 13.")
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        PreferencesManager.context  = this
         workManager = WorkManager.getInstance(this)
         mainViewModel.getAllEnqueuedWork(workManager)
-        PreferencesManager.context  = this
         intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false)?.let{
             mainViewModel.getAllOldPasswords()
         }
@@ -163,10 +209,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val enqueuedWork by mainViewModel.enqueuedWork.collectAsState()
-
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    NotificationPermissionRequester()
-                }
 
                 LaunchedEffect(true) {
 //                  if no task is scheduled, schedule it
@@ -334,6 +376,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
+                                checkAndRequestNotificationPermission(this)
                                 HomeScreen(Modifier
                                     .padding(innerPadding)
                                     .blur(if (isDialogOpen) 2.dp else 0.dp),
