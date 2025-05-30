@@ -25,6 +25,8 @@
 - #### Search passwords by username and website/app name.
 - #### Simple and intuitive UI.
 - #### All passwords are encrypted using AES.
+- #### Automatic reminders for updating passwords older than 3 Months.
+- #### Option to manually configure reminders for each password.
 
 <br />
 
@@ -44,13 +46,13 @@
 <br />
 
 <p vspace = "20" align="center" >
-    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/enter_data.png" width =175 
+    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/add_new_password_typing.png" width =175 
   height = 350/>
-    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/add_new_password_generate.png" width =175 
+    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/add_new_password.png" width =175 
   height = 350/>
    <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/details.png" width =175 
   height = 350/>
-   <img hspace="10" width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/update_password.png">
+   <img hspace="10" width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/update_password_new.png">
 </p>
 
 <br />
@@ -68,11 +70,27 @@
  <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/delete_all.png" width =175 height = 350/>
  <img hspace="10" width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/export_password.png"/>
  <img hspace="10" width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/select_location.png"/>
- <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/password_protected_pdf.png" width =175  height = 350/>
- <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/passwords_pdf.png" width =175  height = 350/>
 
 </p>
+
 <br />
+
+
+<p vspace = "20" align="center" >
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/password_protected_pdf.png" width =175  height = 350/>
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/passwords_pdf.png" width =175  height = 350/>
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/update_password_reminder.png" width =175 height = 350/>
+ <img hspace="10" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/update_password_dialog.png" width =175 height = 350/>
+</p>
+
+<br/>
+
+<p vspace = "20" align="center" >
+ <img hspace="10" width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/update_password_screen.png"/>
+ <img hspace="10" width="190" height="350" src="https://github.com/KunalFarmah98/KPass/blob/main/app/src/debug/res/raw/ignore_password_dialog.png"/>
+</p>
+
+<br/>
 
 ## Usage
 
