@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
 //                  if no task is scheduled, schedule it
                     if (enqueuedWork == null) {
                         workManager.cancelAllWork()
-                        Log.e("WorkManager", "Enqueuing new work")
+                        Log.d("WorkManager", "Enqueuing new work")
                         workManager.enqueue(
                             PeriodicWorkRequest.Builder(
                                 UpdatePasswordWorker::class.java, 7, TimeUnit.DAYS
@@ -187,7 +187,7 @@ class MainActivity : AppCompatActivity() {
                                 .build()
                         )
                     } else {
-                        Log.e("WorkManager", "work is already queued $enqueuedWork")
+                        Log.d("WorkManager", "work is already queued $enqueuedWork")
                     }
                 }
 
