@@ -347,9 +347,15 @@ class MainActivity : AppCompatActivity() {
                                     allowEnterPassword = false
                                     ConfirmationDialog(
                                         title = stringResource(R.string.password_age_alert_title),
-                                        body = "You have $oldPasswordsCount passwords older than 3 Months. To ensure security of your account, " +
-                                                "it is recommended to update your passwords every 3 months.\nOnce you click confirm, " +
-                                                "you can see what passwords you need to update and you can update the once you want",
+                                        body = buildString {
+                                            append(
+                                                stringResource(
+                                                    R.string.update_pass_dialog_body_1,
+                                                    oldPasswordsCount as Int
+                                                ))
+                                            append(stringResource(R.string.update_password_dialog_body_2))
+                                            append(stringResource(R.string.update_pass_dialog_body_3))
+                                        },
                                         onNegativeClick = {
                                             showUpdatePasswordDialog = false
                                             showOldPasswords = false

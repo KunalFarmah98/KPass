@@ -27,4 +27,7 @@
     <string name="stop_receiving_alerts_for_this_password">Stop receiving alerts for this password?</string>
     <string name="ignore_body">You will no longer be notified to update this password until you update it manually again</string>
     <string name="remind_me_to_update_every_3_months">Remind me to update every 3 months</string>
+    <string name="update_password_dialog_body_2">"it is recommended to update your passwords every 3 months.\nOnce you click confirm, "</string>
+    <string name="update_pass_dialog_body_3">you can see what passwords you need to update and you can update the once you want</string>
+    <string name="update_pass_dialog_body_1">"You have %1$s passwords older than 3 Months. To ensure security of your accounts, "</string>
 </resources>
