@@ -16,8 +16,8 @@ android {
         applicationId = "com.apps.kunalfarmah.kpass"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.6"
+        versionCode = 7
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String","KEY_MASTER", gradleLocalProperties(rootDir, providers).getProperty("KEY_MASTER"))
         buildConfigField("String","LOWERCASE_POOL", gradleLocalProperties(rootDir, providers).getProperty("LOWERCASE"))
@@ -81,6 +81,8 @@ dependencies {
     implementation(libs.room)
     implementation(libs.room.ktx)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.work.manager)
+    implementation(libs.koin.workManager)
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit)
@@ -90,4 +92,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

@@ -21,4 +21,19 @@
     <string name="unlock_app">Unlock App</string>
     <string name="please_use_your_fingerprint_or_screen_lock_to_unlock_the_app">Please use your fingerprint or screen lock to unlock the app</string>
     <string name="please_select_the_location_for_the_export">Please select the location for the export</string>
+    <string name="password_age_alert_title">Update old passwords</string>
+    <string name="continue_button">Update\n</string>
+    <string name="remind_me_later_button">Remind me later\n</string>
+    <string name="stop_receiving_alerts_for_this_password">Stop receiving alerts for this password?</string>
+    <string name="ignore_body">You will no longer be notified to update this password until you update it manually again</string>
+    <string name="remind_me_to_update_every_3_months">Remind me to update every 3 months</string>
+    <string name="update_password_dialog_body_2">"it is recommended to update your passwords every 3 months.\nOnce you click confirm, "</string>
+    <string name="update_pass_dialog_body_3">you can see what passwords you need to update and you can update the once you want</string>
+    <string name="update_pass_dialog_body_1">"You have %1$s passwords older than 3 Months. To ensure security of your accounts, "</string>
+    <string name="notification_permission_denied_toast">Notification permission denied. You will not be able to receive reminders.</string>
+    <string name="notification_permission_required">Notification Permission Required</string>
+    <string name="notification_permission_dialog_content">Please grant the notification permission to receive alerts for passwords older than 90 days.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="no_thanks">No Thanks</string>
+    <string name="notification_permission_is_required_to">Notification permission is required to receive password update reminders.</string>
 </resources>

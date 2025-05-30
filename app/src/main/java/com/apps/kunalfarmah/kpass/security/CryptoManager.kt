@@ -67,7 +67,6 @@ object CryptoManager {
     private fun getOrCreateKey(): SecretKey {
         val existingKey = keyStore.getKey(KEY_MASTER, null) as? SecretKey
         val key = existingKey ?: createKey()
-        Log.d("CryptoManager", "existingKey: $key")
         return key
     }
 

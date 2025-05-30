@@ -27,7 +27,9 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
+import com.apps.kunalfarmah.kpass.model.ConfirmationDialogContent
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.model.DialogModel
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -57,7 +59,7 @@ fun MainScreen(modifier: Modifier) {
         }) {
             Text("encrypt")
         }
-        SelectionContainer() {
+        SelectionContainer {
             Column {
                 Text(modifier = Modifier.padding(20.dp), text = encryptedText.value)
             }
@@ -74,8 +76,9 @@ fun MainScreen(modifier: Modifier) {
 }
 
 @Composable
-fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (state: Boolean) -> Unit = {}) {
+fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, shouldUpdatePasswords: Boolean ?= false, isUpdatePasswordDialogOpen: Boolean = false, setFabState: (state: Boolean) -> Unit = {}) {
     val passwords by viewModel.passwords.collectAsStateWithLifecycle()
+    val oldPasswords by viewModel.oldPasswords.collectAsStateWithLifecycle()
     val currentItem by viewModel.currentItem.collectAsStateWithLifecycle()
 
     var openAddPasswordDialog by rememberSaveable {
@@ -90,9 +93,20 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
     var openPasswordDetailsDialog  by rememberSaveable {
         mutableStateOf(false)
     }
+    var updateOldPasswords by rememberSaveable {
+        mutableStateOf(shouldUpdatePasswords == true)
+    }
+
+    var openUpdatePasswordDialog by rememberSaveable {
+        mutableStateOf(isUpdatePasswordDialogOpen)
+    }
 
     var addedItemIndex by rememberSaveable {
         mutableIntStateOf(-1)
+    }
+
+    var confirmationDialogContent by rememberSaveable {
+        mutableStateOf<ConfirmationDialogContent?>(null)
     }
 
     val context = LocalContext.current
@@ -101,7 +115,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
 
     val isDialogOpen by remember {
         derivedStateOf {
-            openAddPasswordDialog || openEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog
+            openAddPasswordDialog || openEditPasswordDialog || openConfirmationDialog || openPasswordDetailsDialog || openUpdatePasswordDialog
         }
     }
 
@@ -117,6 +131,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                 }
                 is DialogModel.ConfirmationDialog -> {
                     openConfirmationDialog = dialogState.show
+                    confirmationDialogContent = dialogState.content
                 }
                 is DialogModel.DetailsDialog -> {
                     openPasswordDetailsDialog = dialogState.show
@@ -125,8 +140,24 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
         }
     }
 
-    LaunchedEffect(isDialogOpen) {
-        setFabState(!isDialogOpen)
+    LaunchedEffect(shouldUpdatePasswords) {
+        if(shouldUpdatePasswords == true){
+            updateOldPasswords = true
+        }
+    }
+
+    LaunchedEffect(updateOldPasswords) {
+        if(!updateOldPasswords){
+            listState.scrollToItem(0)
+        }
+    }
+
+    LaunchedEffect(isUpdatePasswordDialogOpen) {
+        openUpdatePasswordDialog = isUpdatePasswordDialogOpen
+    }
+
+    LaunchedEffect(isDialogOpen, updateOldPasswords) {
+        setFabState(!isDialogOpen && updateOldPasswords != true)
     }
 
     LaunchedEffect(addedItemIndex){
@@ -166,26 +197,53 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                SearchPassword(onSearch = {query ->
-                    viewModel.search(query)
-                }, enabled = !isDialogOpen)
+                if(!updateOldPasswords) {
+                    SearchPassword(onSearch = { query ->
+                        viewModel.search(query)
+                    }, enabled = !isDialogOpen)
+                }
+                else{
+                    Button(modifier = Modifier.padding(top = 10.dp), onClick = {
+                        viewModel.getAllPasswords()
+                        updateOldPasswords = false
+                    }) {
+                        Text("Confirm Updating Old Passwords")
+                    }
+                }
                 PasswordsList(
                     state = listState,
-                    passwords = (passwords as DataModel.Success).data,
+                    passwords = if(updateOldPasswords) (oldPasswords as DataModel.Success).data else (passwords as DataModel.Success).data,
+                    arePasswordsExpired = updateOldPasswords,
                     onCopyClick = { data: PasswordMap ->
                         context.copyToClipboard(label = "password", CryptoManager.decrypt(data.password))
                     },
                     onEditClick = { data: PasswordMap ->
-                        if (!isDialogOpen)
+                        if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openAddOrEditPasswordDialog(data, true)
                     },
                     onDeleteClick = { data: PasswordMap ->
-                        if (!isDialogOpen)
+                        if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openConfirmationDialog(data)
                     },
                     onItemClick = { data: PasswordMap ->
-                        if (!isDialogOpen)
+                        if (!isDialogOpen && !openUpdatePasswordDialog)
                             viewModel.openPasswordDetailDialog(data)
+                    },
+                    onIgnoreClick = { data: PasswordMap ->
+                        viewModel.openConfirmationDialog(
+                            data,
+                            ConfirmationDialogContent(
+                                context.getString(R.string.stop_receiving_alerts_for_this_password),
+                                context.getString(R.string.ignore_body),
+                                onPositiveClick = {
+                                    viewModel.ignorePassword(data)
+                                    viewModel.closeConfirmationDialog()
+                                },
+                                onNegativeClick = {
+                                    viewModel.closeConfirmationDialog()
+                                }
+                            )
+                        )
                     }
                 )
             }
@@ -207,6 +265,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                     websiteName = data.websiteName,
                     username = data.username,
                     password = data.password,
+                    isIgnored = data.isIgnored,
                     isUpdate = false
                 ){
                     addedItemIndex = it
@@ -229,6 +288,7 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
                     websiteName = data.websiteName,
                     username = data.username,
                     password = data.password,
+                    isIgnored = data.isIgnored,
                     isUpdate = true
                 )
                 viewModel.closeAddOrEditPasswordDialog(true)
@@ -241,15 +301,15 @@ fun HomeScreen(modifier: Modifier, viewModel: PasswordViewModel, setFabState: (s
     }
     else if (openConfirmationDialog) {
         ConfirmationDialog(
-            title = "Delete Password",
-            body = "Are you sure you want to delete this password?\nIt can not be recovered again",
-            onPositiveClick = {
+            title = confirmationDialogContent?.title ?: "Delete Password",
+            body = confirmationDialogContent?.body ?: "Are you sure you want to delete this password?\nIt can not be recovered again",
+            onPositiveClick = confirmationDialogContent?.onPositiveClick ?: {
                 if (currentItem != null) {
                     viewModel.deletePassword(currentItem!!.id)
                     viewModel.closeConfirmationDialog()
                 }
             },
-            onNegativeClick = {
+            onNegativeClick = confirmationDialogContent?.onNegativeClick ?: {
                 viewModel.closeConfirmationDialog()
             }
         )

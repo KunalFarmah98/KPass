@@ -1,6 +1,10 @@
 package com.apps.kunalfarmah.kpass.ui.activity
 
+import android.Manifest
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import android.net.Uri
 import android.os.Build
@@ -45,11 +49,18 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.apps.kunalfarmah.kpass.R
+import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -62,9 +73,11 @@ import com.apps.kunalfarmah.kpass.ui.theme.KPassTheme
 import com.apps.kunalfarmah.kpass.utils.PdfUtil
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
+import com.apps.kunalfarmah.kpass.worker.UpdatePasswordWorker
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -72,6 +85,8 @@ class MainActivity : AppCompatActivity() {
     private val mainViewModel: PasswordViewModel by viewModel()
 
     private lateinit var createFileLauncher: ActivityResultLauncher<String>
+
+    private lateinit var workManager: WorkManager
 
 
     private val promptManager by lazy {
@@ -99,11 +114,58 @@ class MainActivity : AppCompatActivity() {
         createFileLauncher.launch("K_Pass_Backup.pdf")
     }
 
+    val permissionLauncher = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Log.d("MainActivity", "Notification Permission GRANTED")
+        } else {
+            Log.w("MainActivity", "Notification Permission DENIED")
+            Toast.makeText(this,
+                getString(R.string.notification_permission_is_required_to), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun checkAndRequestNotificationPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+                if(shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)){
+                    AlertDialog.Builder(context)
+                        .setTitle(getString(R.string.notification_permission_required))
+                        .setMessage(getString(R.string.notification_permission_dialog_content))
+                        .setPositiveButton(getString(R.string.grant_permission)) { dialog, _ ->
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                        .setNegativeButton(getString(R.string.no_thanks)) { dialog, _ ->
+                            dialog.cancel()
+                        }
+                        .create()
+                        .show()
+                }
+                else{
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            } else {
+                Log.d("MainActivity", "Notification permission already granted.")
+            }
+        } else {
+            Log.d("MainActivity", "Notification permission not required before Android 13.")
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         PreferencesManager.context  = this
+        workManager = WorkManager.getInstance(this)
+        mainViewModel.getAllEnqueuedWork(workManager)
+        intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false)?.let{
+            mainViewModel.getAllOldPasswords()
+        }
         createFileLauncher = registerForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri: Uri? ->
@@ -128,11 +190,57 @@ class MainActivity : AppCompatActivity() {
                 var deleteAllPasswords by rememberSaveable {
                     mutableStateOf(false)
                 }
+                var showOldPasswords by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                var showUpdatePasswordDialog by remember {
+                    mutableStateOf(intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false) == true)
+                }
+                val oldPasswordsCount by remember {
+                    mutableStateOf(intent.extras?.getInt(Constants.OLD_PASSWORDS_COUNT,0))
+                }
                 val isDialogOpen by remember {
                     derivedStateOf {
-                        enterPassword || changePassword || deleteAllPasswords
+                        enterPassword || changePassword || deleteAllPasswords || showUpdatePasswordDialog
                     }
                 }
+                var allowEnterPassword by remember {
+                    mutableStateOf(!isDialogOpen && !showUpdatePasswordDialog)
+                }
+
+                val enqueuedWork by mainViewModel.enqueuedWork.collectAsState()
+
+                LaunchedEffect(true) {
+//                  if no task is scheduled, schedule it
+                    if (enqueuedWork == null) {
+                        workManager.cancelAllWork()
+                        Log.d("WorkManager", "Enqueuing new work")
+                        workManager.enqueue(
+                            PeriodicWorkRequest.Builder(
+                                UpdatePasswordWorker::class.java, 7, TimeUnit.DAYS
+                            )
+                                .setInitialDelay(2, TimeUnit.HOURS)
+                                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
+                                .setConstraints(
+                                    Constraints.Builder()
+                                        .setRequiresBatteryNotLow(true)
+                                        .build()
+                                )
+                                .build()
+                        )
+                    } else {
+                        Log.d("WorkManager", "work is already queued $enqueuedWork")
+                    }
+                }
+
+//                    workManager.cancelAllWork()
+//                    workManager.enqueue(
+//                        OneTimeWorkRequest.Builder(
+//                            UpdatePasswordWorker::class.java
+//                        )
+//                            .setInitialDelay(10, TimeUnit.SECONDS)
+//                            .build()
+//                    )
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
@@ -203,7 +311,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                     },
-                    floatingActionButton = { AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
+                    floatingActionButton = { if(allowEnterPassword) AddPassword { mainViewModel.openAddOrEditPasswordDialog() } }
                 )
                 { innerPadding ->
                     var biometricResult by remember {
@@ -268,9 +376,41 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             BiometricPromptManager.BiometricResult.AuthenticationSuccess -> {
+                                checkAndRequestNotificationPermission(this)
                                 HomeScreen(Modifier
                                     .padding(innerPadding)
-                                    .blur(if (isDialogOpen) 2.dp else 0.dp), mainViewModel)
+                                    .blur(if (isDialogOpen) 2.dp else 0.dp),
+                                    mainViewModel,
+                                    showOldPasswords,
+                                    showUpdatePasswordDialog
+                                ){ enabled ->
+                                    allowEnterPassword = enabled
+                                }
+                                if(showUpdatePasswordDialog == true){
+                                    allowEnterPassword = false
+                                    ConfirmationDialog(
+                                        title = stringResource(R.string.password_age_alert_title),
+                                        body = buildString {
+                                            append(
+                                                stringResource(
+                                                    R.string.update_pass_dialog_body_1,
+                                                    oldPasswordsCount as Int
+                                                ))
+                                            append(stringResource(R.string.update_password_dialog_body_2))
+                                            append(stringResource(R.string.update_pass_dialog_body_3))
+                                        },
+                                        onNegativeClick = {
+                                            showUpdatePasswordDialog = false
+                                            showOldPasswords = false
+                                            allowEnterPassword = true
+                                        },
+                                        onPositiveClick = {
+                                            showUpdatePasswordDialog = false
+                                            showOldPasswords = true
+                                            allowEnterPassword = true
+                                        }
+                                    )
+                                }
                                 if(enterPassword || changePassword){
                                     EnterPassword(onClose = {
                                         enterPassword = false

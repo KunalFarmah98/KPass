@@ -1,6 +1,7 @@
 package com.apps.kunalfarmah.kpass.db
 
 import android.annotation.SuppressLint
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -15,7 +16,9 @@ data class PasswordMap(
     val websiteUrl: String?="",
     val username: String = "",
     val password: String = "",
-    val lastModified: Long = System.currentTimeMillis()
+    val lastModified: Long = System.currentTimeMillis(),
+    @ColumnInfo(defaultValue = "0")
+    val isIgnored: Int = 0
 ){
     override fun toString(): String {
         return "Website: $websiteName ($websiteUrl) | Username: $username | Password: $password"
