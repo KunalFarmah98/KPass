@@ -56,7 +56,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -254,16 +253,6 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 }
-
-//                workManager.cancelAllWork()
-//                workManager.enqueue(
-//                    OneTimeWorkRequest.Builder(
-//                        UpdatePasswordWorker::class.java
-//                    )
-//                        .setInitialDelay(10, TimeUnit.SECONDS)
-//                        .build()
-//                )
-//            }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
