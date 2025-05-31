@@ -34,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,11 +55,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.constant.Constants
+import com.apps.kunalfarmah.kpass.constant.Constants.UPDATE_PASSWORDS
+import com.apps.kunalfarmah.kpass.constant.Constants.UPDATE_PASSWORD_WORK_NAME
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
@@ -88,6 +91,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var workManager: WorkManager
 
+    // global state to handle update old passwords dialog
+    private var updatePasswords by mutableStateOf(false)
 
     private val promptManager by lazy {
         BiometricPromptManager(this)
@@ -162,10 +167,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         PreferencesManager.context  = this
         workManager = WorkManager.getInstance(this)
-        mainViewModel.getAllEnqueuedWork(workManager)
-        intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false)?.let{
-            mainViewModel.getAllOldPasswords()
-        }
+
+        // Process the initial intent that created the activity
+        handleIntent(intent)
+
         createFileLauncher = registerForActivityResult(
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri: Uri? ->
@@ -194,10 +199,7 @@ class MainActivity : AppCompatActivity() {
                     mutableStateOf(false)
                 }
                 var showUpdatePasswordDialog by remember {
-                    mutableStateOf(intent.extras?.getBoolean(Constants.UPDATE_PASSWORDS,false) == true)
-                }
-                val oldPasswordsCount by remember {
-                    mutableStateOf(intent.extras?.getInt(Constants.OLD_PASSWORDS_COUNT,0))
+                    mutableStateOf(updatePasswords)
                 }
                 val isDialogOpen by remember {
                     derivedStateOf {
@@ -208,39 +210,60 @@ class MainActivity : AppCompatActivity() {
                     mutableStateOf(!isDialogOpen && !showUpdatePasswordDialog)
                 }
 
-                val enqueuedWork by mainViewModel.enqueuedWork.collectAsState()
+                LaunchedEffect(updatePasswords) {
+                    showUpdatePasswordDialog = updatePasswords
+                }
 
                 LaunchedEffect(true) {
-//                  if no task is scheduled, schedule it
-                    if (enqueuedWork == null) {
+                    // Get current work info for this unique work
+                    val workInfoList =
+                        workManager.getWorkInfosForUniqueWork(UPDATE_PASSWORD_WORK_NAME).get()
+                    val isAlreadyScheduledAndActive = workInfoList.any {
+                        it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING
+                    }
+                    if (!isAlreadyScheduledAndActive) {
                         workManager.cancelAllWork()
-                        Log.d("WorkManager", "Enqueuing new work")
-                        workManager.enqueue(
-                            PeriodicWorkRequest.Builder(
-                                UpdatePasswordWorker::class.java, 7, TimeUnit.DAYS
+                        Log.d(
+                            "WorkManager",
+                            "Enqueuing new periodic work: $UPDATE_PASSWORD_WORK_NAME"
+                        )
+                        val periodicWorkRequest = PeriodicWorkRequest.Builder(
+                            UpdatePasswordWorker::class.java, 7, TimeUnit.DAYS
+                        )
+                            .setInitialDelay(
+                                2,
+                                TimeUnit.HOURS
                             )
-                                .setInitialDelay(2, TimeUnit.HOURS)
-                                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
-                                .setConstraints(
-                                    Constraints.Builder()
-                                        .setRequiresBatteryNotLow(true)
-                                        .build()
-                                )
-                                .build()
+                            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.MINUTES)
+                            .setConstraints(
+                                Constraints.Builder()
+                                    .setRequiresBatteryNotLow(true)
+                                    .build()
+                            )
+                            .build()
+
+                        workManager.enqueueUniquePeriodicWork(
+                            UPDATE_PASSWORD_WORK_NAME,
+                            ExistingPeriodicWorkPolicy.UPDATE,
+                            periodicWorkRequest
                         )
                     } else {
-                        Log.d("WorkManager", "work is already queued $enqueuedWork")
+                        Log.d(
+                            "WorkManager",
+                            "Work $UPDATE_PASSWORD_WORK_NAME is already scheduled: $workInfoList"
+                        )
                     }
                 }
 
-//                    workManager.cancelAllWork()
-//                    workManager.enqueue(
-//                        OneTimeWorkRequest.Builder(
-//                            UpdatePasswordWorker::class.java
-//                        )
-//                            .setInitialDelay(10, TimeUnit.SECONDS)
-//                            .build()
+//                workManager.cancelAllWork()
+//                workManager.enqueue(
+//                    OneTimeWorkRequest.Builder(
+//                        UpdatePasswordWorker::class.java
 //                    )
+//                        .setInitialDelay(10, TimeUnit.SECONDS)
+//                        .build()
+//                )
+//            }
                 Scaffold(modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
@@ -394,7 +417,10 @@ class MainActivity : AppCompatActivity() {
                                             append(
                                                 stringResource(
                                                     R.string.update_pass_dialog_body_1,
-                                                    oldPasswordsCount as Int
+                                                    mainViewModel.oldPasswords.value.let{
+                                                        if(it is DataModel.Success) it.data.size
+                                                        else intent.extras?.getInt(Constants.OLD_PASSWORDS_COUNT,0) ?: 0
+                                                    }
                                                 ))
                                             append(stringResource(R.string.update_password_dialog_body_2))
                                             append(stringResource(R.string.update_pass_dialog_body_3))
@@ -474,6 +500,24 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    /**
+     * Helper function to process extras from an Intent and update Activity state.
+     */
+    private fun handleIntent(intentToProcess: Intent?) {
+        intentToProcess?.extras?.getBoolean(UPDATE_PASSWORDS, false)?.let { shouldUpdate ->
+            this.updatePasswords = shouldUpdate
+            if (shouldUpdate) {
+                mainViewModel.getAllOldPasswords()
             }
         }
     }
