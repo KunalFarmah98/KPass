@@ -27,27 +27,45 @@ object CryptoManager {
 
 
     fun encrypt(plainText: String): String {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
+        if (plainText.isEmpty()) return ""
+        return try {
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey())
 
-        val encryptedBytes = cipher.doFinal(plainText.toByteArray())
-        val iv = cipher.iv
+            val encryptedBytes = cipher.doFinal(plainText.toByteArray())
+            val iv = cipher.iv
 
-        val encryptedDataWithIV = ByteArray(iv.size + encryptedBytes.size)
-        System.arraycopy(iv, 0, encryptedDataWithIV, 0, iv.size)
-        System.arraycopy(encryptedBytes, 0, encryptedDataWithIV, iv.size, encryptedBytes.size)
-        return Base64.encodeToString(encryptedDataWithIV, Base64.DEFAULT)
+            val encryptedDataWithIV = ByteArray(iv.size + encryptedBytes.size)
+            System.arraycopy(iv, 0, encryptedDataWithIV, 0, iv.size)
+            System.arraycopy(encryptedBytes, 0, encryptedDataWithIV, iv.size, encryptedBytes.size)
+            Base64.encodeToString(encryptedDataWithIV, Base64.DEFAULT)
+        } catch (e: Exception) {
+            Log.e("CryptoManager", "Encryption failed", e)
+            ""
+        }
     }
 
-    fun decrypt(encryptedText: String): String {
-        val encryptedDataWithIV = Base64.decode(encryptedText, Base64.DEFAULT)
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val iv = encryptedDataWithIV.copyOfRange(0, cipher.blockSize)
-        cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), IvParameterSpec(iv))
+    fun decrypt(encryptedText: String?): String {
+        if (encryptedText.isNullOrEmpty()) return ""
+        return try {
+            val encryptedDataWithIV = Base64.decode(encryptedText, Base64.DEFAULT)
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            val blockSize = cipher.blockSize
+            
+            if (encryptedDataWithIV.size <= blockSize) {
+                return ""
+            }
 
-        val encryptedData = encryptedDataWithIV.copyOfRange(cipher.blockSize, encryptedDataWithIV.size)
-        val decryptedBytes = cipher.doFinal(encryptedData)
-        return String(decryptedBytes, Charsets.UTF_8)
+            val iv = encryptedDataWithIV.copyOfRange(0, blockSize)
+            cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), IvParameterSpec(iv))
+
+            val encryptedData = encryptedDataWithIV.copyOfRange(blockSize, encryptedDataWithIV.size)
+            val decryptedBytes = cipher.doFinal(encryptedData)
+            String(decryptedBytes, Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.e("CryptoManager", "Decryption failed", e)
+            ""
+        }
     }
 
     private fun createKey(): SecretKey {

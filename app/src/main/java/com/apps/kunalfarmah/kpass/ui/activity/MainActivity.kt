@@ -526,6 +526,8 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             return@EnterPassword
                                         }
+                                        CryptoManager.password = password
+                                        mainViewModel.savePassword(password)
                                         importedFileUri?.let { uri ->
                                             lifecycleScope.launch(Dispatchers.IO) {
                                                 val passwords = PdfUtil.importPasswordsFromPdf(this@MainActivity, uri, password)
