@@ -5,12 +5,14 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
-import com.apps.kunalfarmah.kpass.ui.activity.MainActivity
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
+import com.apps.kunalfarmah.kpass.ui.activity.MainActivity
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.events.Event
 import com.itextpdf.kernel.events.IEventHandler
@@ -21,9 +23,12 @@ import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.EncryptionConstants
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfPage
+import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.ReaderProperties
 import com.itextpdf.kernel.pdf.WriterProperties
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor
 import com.itextpdf.layout.Canvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Image
@@ -33,7 +38,9 @@ import com.itextpdf.layout.properties.ListNumberingType
 import com.itextpdf.layout.properties.TextAlignment
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.io.OutputStream
+import java.util.UUID
 
 
 object PdfUtil {
@@ -103,6 +110,68 @@ object PdfUtil {
         } catch (e: IOException) {
             Toast.makeText(context, context.getString(R.string.something_went_wrong_exporting_the_passwords_please_try_again), Toast.LENGTH_SHORT).show()
             Log.e("createPdfWithPassword", "Error creating PDF: " + e.message)
+        }
+    }
+
+    fun importPasswordsFromPdf(context: Context, fileUri: Uri, password: String): List<PasswordMap>? {
+        val contentResolver = context.contentResolver
+        var inputStream: InputStream? = null
+        try {
+            inputStream = contentResolver.openInputStream(fileUri)
+            val readerProperties = ReaderProperties().setPassword(password.toByteArray())
+            val pdfReader = PdfReader(inputStream, readerProperties)
+            val pdfDocument = PdfDocument(pdfReader)
+            val passwords = mutableListOf<PasswordMap>()
+
+            for (i in 1..pdfDocument.numberOfPages) {
+                val pageText = PdfTextExtractor.getTextFromPage(pdfDocument.getPage(i))
+                val lines = pageText.split("\n")
+                var currentWebsite = ""
+                var currentUrl = ""
+                var currentUsername = ""
+                var currentPassword = ""
+
+                lines.forEach { line ->
+                    val trimmedLine = line.trim()
+                    when {
+                        trimmedLine.contains("(") && trimmedLine.contains(")") && !trimmedLine.startsWith("username:", ignoreCase = true) && !trimmedLine.startsWith("Password:", ignoreCase = true) -> {
+                             // This is likely the website and URL line: "Website (URL)"
+                            val parts = trimmedLine.split(" (")
+                            currentWebsite = parts[0].substringAfter(". ").trim()
+                            currentUrl = parts.getOrNull(1)?.replace(")", "")?.trim() ?: ""
+                        }
+                        trimmedLine.startsWith("username:", ignoreCase = true) -> {
+                            currentUsername = trimmedLine.substringAfter("username:").trim()
+                        }
+                        trimmedLine.startsWith("Password:", ignoreCase = true) -> {
+                            currentPassword = trimmedLine.substringAfter("Password:").trim()
+                            if (currentWebsite.isNotEmpty() && currentUsername.isNotEmpty() && currentPassword.isNotEmpty()) {
+                                passwords.add(
+                                    PasswordMap(
+                                        id = "imported_${UUID.randomUUID()}",
+                                        websiteName = currentWebsite,
+                                        websiteUrl = currentUrl,
+                                        username = currentUsername,
+                                        password = currentPassword // Raw password, will be encrypted in repo
+                                    )
+                                )
+                                // Reset for next item
+                                currentWebsite = ""
+                                currentUrl = ""
+                                currentUsername = ""
+                                currentPassword = ""
+                            }
+                        }
+                    }
+                }
+            }
+            pdfDocument.close()
+            return passwords
+        } catch (e: Exception) {
+            Log.e("importPasswordsFromPdf", "Error importing PDF: " + e.message)
+            return null
+        } finally {
+            inputStream?.close()
         }
     }
 
