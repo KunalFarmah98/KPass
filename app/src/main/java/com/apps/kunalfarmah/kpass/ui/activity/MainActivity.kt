@@ -131,20 +131,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveImportedPasswords(passwords: List<PasswordMap>) {
-        passwords.forEach {
-            mainViewModel.insertOrUpdatePassword(
-                id = it.id,
-                websiteName = it.websiteName,
-                websiteUrl = it.websiteUrl,
-                username = it.username,
-                password = it.password, // This is the raw password from import
-                isUpdate = false,
-                isIgnored = it.isIgnored
-            )
-        }
-        lifecycleScope.launch(Dispatchers.Main) {
-            Toast.makeText(this@MainActivity, getString(R.string.passwords_imported_successfully), Toast.LENGTH_SHORT).show()
+    private fun saveImportedPasswords(passwords: List<PasswordMap>, onComplete: (() -> Unit)? = null) {
+        if (passwords.isNotEmpty()) {
+            passwords.forEach {
+                mainViewModel.insertOrUpdatePassword(
+                    id = it.id,
+                    websiteName = it.websiteName,
+                    websiteUrl = it.websiteUrl,
+                    username = it.username,
+                    password = it.password, // This is the raw password from import
+                    isUpdate = false,
+                    isIgnored = it.isIgnored
+                )
+            }
+            lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.passwords_imported_successfully),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            onComplete?.invoke()
         }
     }
 
@@ -244,6 +251,9 @@ class MainActivity : AppCompatActivity() {
                 var showImportPasswordDialog by rememberSaveable {
                     mutableStateOf(false)
                 }
+                var isImportingPasswords by rememberSaveable {
+                    mutableStateOf(false)
+                }
                 val isDialogOpen by remember {
                     derivedStateOf {
                         enterPassword || changePassword || deleteAllPasswords || showUpdatePasswordDialog || showImportPasswordDialog
@@ -263,7 +273,9 @@ class MainActivity : AppCompatActivity() {
                             PdfUtil.importPasswordsFromPdf(this@MainActivity, uri, CryptoManager.password)
                         }
                         if (passwords != null) {
-                            saveImportedPasswords(passwords)
+                            saveImportedPasswords(passwords){
+                                isImportingPasswords = false
+                            }
                             importedFileUri = null
                         } else {
                             showImportPasswordDialog = true
@@ -370,6 +382,7 @@ class MainActivity : AppCompatActivity() {
                                                 enterPassword = false
                                             }
                                             getString(R.string.import_passwords) -> {
+                                                isImportingPasswords = true
                                                 pickFile()
                                             }
                                         }
@@ -406,7 +419,9 @@ class MainActivity : AppCompatActivity() {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             lifecycleScope.launch {
                                 repeatOnLifecycle(Lifecycle.State.STARTED){
-                                    authenticate()
+                                    if(!isImportingPasswords) {
+                                        authenticate()
+                                    }
                                 }
                             }
                         }
@@ -533,8 +548,10 @@ class MainActivity : AppCompatActivity() {
                                                 val passwords = PdfUtil.importPasswordsFromPdf(this@MainActivity, uri, password)
                                                 withContext(Dispatchers.Main) {
                                                     if (passwords != null) {
-                                                        saveImportedPasswords(passwords)
-                                                        showImportPasswordDialog = false
+                                                        saveImportedPasswords(passwords){
+                                                            isImportingPasswords = false
+                                                            showImportPasswordDialog = false
+                                                        }
                                                         importedFileUri = null
                                                     } else {
                                                         Toast.makeText(this@MainActivity, getString(R.string.invalid_password), Toast.LENGTH_SHORT).show()
