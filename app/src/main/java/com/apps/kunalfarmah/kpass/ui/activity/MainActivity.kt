@@ -71,8 +71,8 @@ import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.constant.Constants.UPDATE_PASSWORDS
 import com.apps.kunalfarmah.kpass.constant.Constants.UPDATE_PASSWORD_WORK_NAME
-import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.model.DataModel
+import com.apps.kunalfarmah.kpass.model.ImportedPassword
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.ui.components.AddPassword
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveImportedPasswords(passwords: List<PasswordMap>, onComplete: (() -> Unit)? = null) {
+    private fun saveImportedPasswords(passwords: List<ImportedPassword>, onComplete: (() -> Unit)? = null) {
         mainViewModel.importPasswords(passwords) {
             lifecycleScope.launch(Dispatchers.Main) {
                 Toast.makeText(

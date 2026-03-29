@@ -5,13 +5,12 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import com.apps.kunalfarmah.kpass.R
 import com.apps.kunalfarmah.kpass.db.PasswordMap
+import com.apps.kunalfarmah.kpass.model.ImportedPassword
 import com.apps.kunalfarmah.kpass.ui.activity.MainActivity
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.events.Event
@@ -40,7 +39,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.util.UUID
 
 
 object PdfUtil {
@@ -113,7 +111,7 @@ object PdfUtil {
         }
     }
 
-    fun importPasswordsFromPdf(context: Context, fileUri: Uri, password: String): List<PasswordMap>? {
+    fun importPasswordsFromPdf(context: Context, fileUri: Uri, password: String): List<ImportedPassword>? {
         val contentResolver = context.contentResolver
         var inputStream: InputStream? = null
         try {
@@ -121,7 +119,7 @@ object PdfUtil {
             val readerProperties = ReaderProperties().setPassword(password.toByteArray())
             val pdfReader = PdfReader(inputStream, readerProperties)
             val pdfDocument = PdfDocument(pdfReader)
-            val passwords = mutableListOf<PasswordMap>()
+            val passwords = mutableListOf<ImportedPassword>()
 
             for (i in 1..pdfDocument.numberOfPages) {
                 val pageText = PdfTextExtractor.getTextFromPage(pdfDocument.getPage(i))
@@ -147,12 +145,11 @@ object PdfUtil {
                             currentPassword = trimmedLine.substringAfter("Password:").trim()
                             if (currentWebsite.isNotEmpty() && currentUsername.isNotEmpty() && currentPassword.isNotEmpty()) {
                                 passwords.add(
-                                    PasswordMap(
-                                        id = "imported_${UUID.randomUUID()}",
+                                    ImportedPassword(
                                         websiteName = currentWebsite,
                                         websiteUrl = currentUrl,
                                         username = currentUsername,
-                                        password = currentPassword // Raw password, will be encrypted in repo
+                                        rawPassword = currentPassword
                                     )
                                 )
                                 // Reset for next item
