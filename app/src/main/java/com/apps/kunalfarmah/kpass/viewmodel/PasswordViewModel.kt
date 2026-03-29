@@ -7,15 +7,18 @@ import com.apps.kunalfarmah.kpass.db.PasswordMap
 import com.apps.kunalfarmah.kpass.model.ConfirmationDialogContent
 import com.apps.kunalfarmah.kpass.model.DataModel
 import com.apps.kunalfarmah.kpass.model.DialogModel
+import com.apps.kunalfarmah.kpass.model.ImportedPassword
 import com.apps.kunalfarmah.kpass.repository.PasswordRepository
 import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class PasswordViewModel(private val passwordRepository: PasswordRepository): ViewModel() {
 
@@ -103,6 +106,29 @@ class PasswordViewModel(private val passwordRepository: PasswordRepository): Vie
             else{
                 _oldPasswords.value = DataModel.Success(passwordRepository.getAllOldPasswords())
             }
+        }
+    }
+
+
+    fun importPasswords(passwords: List<ImportedPassword>, onComplete: () -> Unit = {}) {
+        viewModelScope.launch(Dispatchers.IO) {
+            passwords.forEachIndexed { index, it ->
+                passwordRepository.insertOrUpdatePassword(
+                    id = "imported_${UUID.randomUUID()}",
+                    websiteName = it.websiteName,
+                    websiteUrl = it.websiteUrl,
+                    username = it.username,
+                    password = it.rawPassword,
+                    isIgnored = 0,
+                    isUpdate = false
+                )
+                if ((index + 1) % 5 == 0) {
+                    delay(500) // 500ms rest after every 5 passwords
+                }
+            }
+            val updatedPasswords = passwordRepository.getAllPasswords()
+            _passwords.value = DataModel.Success(updatedPasswords)
+            onComplete()
         }
     }
 

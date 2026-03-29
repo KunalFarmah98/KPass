@@ -21,11 +21,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +55,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
@@ -64,6 +72,7 @@ import com.apps.kunalfarmah.kpass.constant.Constants
 import com.apps.kunalfarmah.kpass.constant.Constants.UPDATE_PASSWORDS
 import com.apps.kunalfarmah.kpass.constant.Constants.UPDATE_PASSWORD_WORK_NAME
 import com.apps.kunalfarmah.kpass.model.DataModel
+import com.apps.kunalfarmah.kpass.model.ImportedPassword
 import com.apps.kunalfarmah.kpass.security.BiometricPromptManager
 import com.apps.kunalfarmah.kpass.security.CryptoManager
 import com.apps.kunalfarmah.kpass.ui.components.AddPassword
@@ -76,8 +85,10 @@ import com.apps.kunalfarmah.kpass.utils.PdfUtil
 import com.apps.kunalfarmah.kpass.utils.PreferencesManager
 import com.apps.kunalfarmah.kpass.viewmodel.PasswordViewModel
 import com.apps.kunalfarmah.kpass.worker.UpdatePasswordWorker
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 
@@ -87,11 +98,16 @@ class MainActivity : AppCompatActivity() {
     private val mainViewModel: PasswordViewModel by viewModel()
 
     private lateinit var createFileLauncher: ActivityResultLauncher<String>
+    private lateinit var pickFileLauncher: ActivityResultLauncher<Array<String>>
 
     private lateinit var workManager: WorkManager
 
     // global state to handle update old passwords dialog
     private var updatePasswords by mutableStateOf(false)
+
+    private var importedFileUri by mutableStateOf<Uri?>(null)
+
+    private var isImportingPasswords by mutableStateOf(false)
 
     private val promptManager by lazy {
         BiometricPromptManager(this)
@@ -116,6 +132,26 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
         createFileLauncher.launch("K_Pass_Backup.pdf")
+    }
+
+    private fun pickFile() {
+        lifecycleScope.launch(Dispatchers.Main) {
+            isImportingPasswords = true
+            pickFileLauncher.launch(arrayOf("application/pdf"))
+        }
+    }
+
+    private fun saveImportedPasswords(passwords: List<ImportedPassword>, onComplete: (() -> Unit)? = null) {
+        mainViewModel.importPasswords(passwords) {
+            lifecycleScope.launch(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.passwords_imported_successfully),
+                    Toast.LENGTH_SHORT
+                ).show()
+                onComplete?.invoke()
+            }
+        }
     }
 
     val permissionLauncher = registerForActivityResult(
@@ -174,14 +210,27 @@ class MainActivity : AppCompatActivity() {
             ActivityResultContracts.CreateDocument("application/pdf")
         ) { uri: Uri? ->
             uri?.let {
-                PdfUtil.exportPasswordsToPdf(
-                    this@MainActivity,
-                    (mainViewModel.passwords.value as DataModel.Success).data,
-                    uri,
-                    CryptoManager.password
-                )
+                lifecycleScope.launch(Dispatchers.IO) {
+                    PdfUtil.exportPasswordsToPdf(
+                        this@MainActivity,
+                        (mainViewModel.passwords.value as DataModel.Success).data,
+                        uri,
+                        CryptoManager.password
+                    )
+                }
             }
         }
+
+        pickFileLauncher = registerForActivityResult(
+            ActivityResultContracts.OpenDocument()
+        ) { uri: Uri? ->
+            if (uri == null) {
+                isImportingPasswords = false
+            } else {
+                importedFileUri = uri
+            }
+        }
+
         enableEdgeToEdge()
         setContent {
             KPassTheme {
@@ -200,9 +249,12 @@ class MainActivity : AppCompatActivity() {
                 var showUpdatePasswordDialog by remember {
                     mutableStateOf(updatePasswords)
                 }
+                var showImportPasswordDialog by rememberSaveable {
+                    mutableStateOf(false)
+                }
                 val isDialogOpen by remember {
                     derivedStateOf {
-                        enterPassword || changePassword || deleteAllPasswords || showUpdatePasswordDialog
+                        enterPassword || changePassword || deleteAllPasswords || showUpdatePasswordDialog || showImportPasswordDialog || isImportingPasswords
                     }
                 }
                 var allowEnterPassword by remember {
@@ -211,6 +263,24 @@ class MainActivity : AppCompatActivity() {
 
                 LaunchedEffect(updatePasswords) {
                     showUpdatePasswordDialog = updatePasswords
+                }
+
+                LaunchedEffect(importedFileUri) {
+                    importedFileUri?.let { uri ->
+                        isImportingPasswords = true
+                        val passwords = withContext(Dispatchers.IO) {
+                            PdfUtil.importPasswordsFromPdf(this@MainActivity, uri, CryptoManager.password)
+                        }
+                        if (passwords != null) {
+                            saveImportedPasswords(passwords){
+                                isImportingPasswords = false
+                                importedFileUri = null
+                            }
+                        } else {
+                            isImportingPasswords = false
+                            showImportPasswordDialog = true
+                        }
+                    }
                 }
 
                 LaunchedEffect(true) {
@@ -299,7 +369,8 @@ class MainActivity : AppCompatActivity() {
                                     OptionsMenu(
                                         titles = listOf(
                                             stringResource(R.string.delete_all),
-                                            stringResource(R.string.change_export_password)
+                                            stringResource(R.string.change_export_password),
+                                            stringResource(R.string.import_passwords)
                                         )
                                     ) {
                                         when (it) {
@@ -309,6 +380,9 @@ class MainActivity : AppCompatActivity() {
                                             getString(R.string.change_export_password) -> {
                                                 changePassword = true
                                                 enterPassword = false
+                                            }
+                                            getString(R.string.import_passwords) -> {
+                                                pickFile()
                                             }
                                         }
                                     }
@@ -344,7 +418,9 @@ class MainActivity : AppCompatActivity() {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             lifecycleScope.launch {
                                 repeatOnLifecycle(Lifecycle.State.STARTED){
-                                    authenticate()
+                                    if(!isImportingPasswords) {
+                                        authenticate()
+                                    }
                                 }
                             }
                         }
@@ -450,6 +526,43 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     }
                                 }
+                                if (showImportPasswordDialog) {
+                                    EnterPassword(
+                                        title = stringResource(R.string.please_enter_the_pdf_password),
+                                        onClose = {
+                                            showImportPasswordDialog = false
+                                            importedFileUri = null
+                                            isImportingPasswords = false
+                                        }
+                                    ) { password ->
+                                        if (password.isEmpty()) {
+                                            lifecycleScope.launch(Dispatchers.Main) {
+                                                Toast.makeText(this@MainActivity, getString(R.string.password_can_not_be_empty), Toast.LENGTH_SHORT).show()
+                                            }
+                                            return@EnterPassword
+                                        }
+                                        CryptoManager.password = password
+                                        mainViewModel.savePassword(password)
+                                        showImportPasswordDialog = false
+                                        isImportingPasswords = true
+                                        importedFileUri?.let { uri ->
+                                            lifecycleScope.launch(Dispatchers.IO) {
+                                                val passwords = PdfUtil.importPasswordsFromPdf(this@MainActivity, uri, password)
+                                                withContext(Dispatchers.Main) {
+                                                    if (passwords != null) {
+                                                        saveImportedPasswords(passwords){
+                                                            isImportingPasswords = false
+                                                            importedFileUri = null
+                                                        }
+                                                    } else {
+                                                        isImportingPasswords = false
+                                                        Toast.makeText(this@MainActivity, getString(R.string.invalid_password), Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 if(deleteAllPasswords){
                                     ConfirmationDialog(
                                         title = stringResource(R.string.delete_all_passwords),
@@ -463,6 +576,28 @@ class MainActivity : AppCompatActivity() {
                                             deleteAllPasswords = false
                                         }
                                     )
+                                }
+                                if (isImportingPasswords) {
+                                    Dialog(onDismissRequest = { }) {
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            shape = RoundedCornerShape(16.dp),
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 20.dp),
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                            ) {
+                                                CircularProgressIndicator()
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Text(text = stringResource(id = R.string.importing_passwords))
+                                            }
+                                        }
+                                    }
                                 }
                             }
 

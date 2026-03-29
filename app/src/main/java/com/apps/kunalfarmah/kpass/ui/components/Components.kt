@@ -207,7 +207,11 @@ fun PasswordsList(
 
 @Preview
 @Composable
-fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
+fun EnterPassword(
+    title: String = "Please provide a password to lock the exported data",
+    onClose: ()-> Unit = {},
+    onConfirm: (String) -> Unit = {}
+){
     var password by rememberSaveable {
         mutableStateOf("")
     }
@@ -225,7 +229,7 @@ fun EnterPassword(onClose: ()-> Unit = {}, onConfirm: (String) -> Unit = {}){
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
-                    "Please provide a password to lock the exported data",
+                    title,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,

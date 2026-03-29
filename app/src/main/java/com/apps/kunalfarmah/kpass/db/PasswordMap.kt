@@ -21,7 +21,7 @@ data class PasswordMap(
     val isIgnored: Int = 0
 ){
     override fun toString(): String {
-        return "Website: $websiteName ($websiteUrl) | Username: $username | Password: $password"
+        return "Website: $websiteName ($websiteUrl) | Username: $username | Password: [REDACTED]"
     }
 
     fun toDecryptedString(): String{

@@ -16,8 +16,8 @@ android {
         applicationId = "com.apps.kunalfarmah.kpass"
         minSdk = 24
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.1.0"
+        versionCode = 8
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String","KEY_MASTER", gradleLocalProperties(rootDir, providers).getProperty("KEY_MASTER"))
         buildConfigField("String","LOWERCASE_POOL", gradleLocalProperties(rootDir, providers).getProperty("LOWERCASE"))

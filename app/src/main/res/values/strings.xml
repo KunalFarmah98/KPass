@@ -36,4 +36,10 @@
     <string name="grant_permission">Grant Permission</string>
     <string name="no_thanks">No Thanks</string>
     <string name="notification_permission_is_required_to">Notification permission is required to receive password update reminders.</string>
+    <string name="import_passwords">Import Passwords</string>
+    <string name="invalid_password">Invalid Password</string>
+    <string name="error_importing_passwords">Error importing passwords</string>
+    <string name="passwords_imported_successfully">Passwords imported successfully</string>
+    <string name="please_enter_the_pdf_password">Please enter the PDF password</string>
+    <string name="importing_passwords">Importing passwords…</string>
 </resources>
